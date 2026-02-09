@@ -6,7 +6,7 @@ const courses = [
   { id: 3, title: 'Class 8', icon: BookOpen, color: 'from-sky-500 to-sky-600', description: 'Advanced problem solving skills' },
   { id: 4, title: 'Class 9', icon: GraduationCap, color: 'from-blue-600 to-blue-700', description: 'Board exam preparation starts' },
   { id: 5, title: 'Class 10', icon: GraduationCap, color: 'from-blue-700 to-blue-800', description: 'Complete board exam mastery' },
-  { id: 6, title: 'Class 11', icon: Atom, color: 'from-orange-500 to-orange-600', description: 'PCM/PCB stream excellence' },
+  { id: 6, title: 'Class 11', icon: Atom, color: 'from-orange-500 to-orange-600', description: 'PCM/PCB/ARTS/COMMERCE stream excellence' },
   { id: 7, title: 'Class 12', icon: Atom, color: 'from-red-500 to-red-600', description: 'Final board exam success' },
   { id: 8, title: 'Foundation', icon: Building2, color: 'from-teal-500 to-teal-600', description: 'Strong base for competitive exams' },
   { id: 9, title: 'NEET', icon: Microscope, color: 'from-green-600 to-green-700', description: 'Medical entrance preparation' },
