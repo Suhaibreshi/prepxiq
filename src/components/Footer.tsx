@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -6,17 +7,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
           <div className="lg:col-span-2">
-            <div className="mb-4 [&_svg_text]:fill-white [&_svg_path]:stroke-white">
-              <svg viewBox="0 0 200 50" className="h-10 w-auto" xmlns="http://www.w3.org/2000/svg">
-                <text x="10" y="35" fontFamily="Inter, system-ui, sans-serif" fontSize="32" fontWeight="800" fill="white">
-                  PREPX
-                </text>
-                <text x="120" y="35" fontFamily="Inter, system-ui, sans-serif" fontSize="32" fontWeight="800" fill="white">
-                  IQ
-                </text>
-                <path d="M 105 15 L 115 25 L 105 35" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M 110 15 L 120 25 L 110 35" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <div className="mb-4">
+              <Logo className="h-10" invert={true} />
             </div>
             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
               PREPX IQ is your trusted partner for comprehensive exam preparation. We're committed to helping students achieve their academic dreams with quality education and expert guidance.
