@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <Logo className="h-10" invert={true} />
+              <Logo className="h-14 sm:h-16" invert={true} />
             </div>
             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
               PREPX IQ is your trusted partner for comprehensive exam preparation. We're committed to helping students achieve their academic dreams with quality education and expert guidance.
