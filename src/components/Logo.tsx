@@ -1,4 +1,4 @@
-export default function Logo({ className = "h-12 sm:h-16", invert = false }) {
+export default function Logo({ className = "h-16 sm:h-24", invert = false }) {
   return (
     <img
       src="/3.png"
