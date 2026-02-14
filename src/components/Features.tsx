@@ -33,7 +33,7 @@ const benefits = [
   { icon: Target, title: 'Result-Oriented', description: 'Focused on success' },
 ];
 
-export default function Features({ onMockTestsClick, onExpertDoubtClick }: { onMockTestsClick?: () => void; onExpertDoubtClick?: () => void }) {
+export default function Features({ onMockTestsClick, onQAClick, onExpertDoubtClick }: { onMockTestsClick?: () => void; onQAClick?: () => void; onExpertDoubtClick?: () => void }) {
   return (
     <section id="features" className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,8 +56,10 @@ export default function Features({ onMockTestsClick, onExpertDoubtClick }: { onM
                 key={feature.id}
                 className={`group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-200 ${isLive ? 'cursor-pointer' : 'cursor-default'}`}
                 onClick={() => {
-                  if (feature.id === 1 || feature.id === 2) {
+                  if (feature.id === 1) {
                     onMockTestsClick?.();
+                  } else if (feature.id === 2) {
+                    onQAClick?.();
                   } else if (feature.id === 3) {
                     onExpertDoubtClick?.();
                   }
