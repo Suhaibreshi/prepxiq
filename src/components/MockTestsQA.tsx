@@ -688,30 +688,30 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-6 px-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 sm:py-6 px-3 sm:px-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 hover:bg-white/20 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-1 sm:gap-2 hover:bg-white/20 px-2 sm:px-4 py-2 rounded-lg transition text-sm sm:text-base flex-shrink-0"
           >
-            <ArrowLeft size={20} />
-            <span>Back</span>
+            <ArrowLeft size={18} className="sm:size-{20}" />
+            <span className="hidden sm:inline">Back</span>
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold">Mock Tests & Q&A Practice</h1>
-          <div className="w-20"></div>
+          <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-center flex-1">Mock Tests & Q&A Practice</h1>
+          <div className="w-12 sm:w-20 flex-shrink-0"></div>
         </div>
       </div>
 
       {/* Filter Stage */}
       {stage === 'filter' && (
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Select Your Exam & Subject</h2>
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-12">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Select Your Exam & Subject</h2>
 
             {/* Category Selection */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Select Category</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Select Category</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                 {/* Classes */}
                 {Object.entries(classMappings).map(([key, label]) => (
                   <button
@@ -720,7 +720,7 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                       setSelectedCategory(key);
                       setSelectedSubject('');
                     }}
-                    className={`p-4 rounded-lg font-semibold transition-all ${
+                    className={`p-2 sm:p-4 rounded-lg font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                       selectedCategory === key
                         ? 'bg-blue-600 text-white shadow-lg'
                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -736,20 +736,20 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                     setSelectedCategory('neetFoundation');
                     setSelectedSubject('');
                   }}
-                  className={`p-4 rounded-lg font-semibold transition-all ${
+                  className={`p-2 sm:p-4 rounded-lg font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                     selectedCategory === 'neetFoundation'
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  NEET Foundation
+                  NEET
                 </button>
                 <button
                   onClick={() => {
                     setSelectedCategory('jee');
                     setSelectedSubject('');
                   }}
-                  className={`p-4 rounded-lg font-semibold transition-all ${
+                  className={`p-2 sm:p-4 rounded-lg font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                     selectedCategory === 'jee'
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -762,7 +762,7 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                     setSelectedCategory('jkssb');
                     setSelectedSubject('');
                   }}
-                  className={`p-4 rounded-lg font-semibold transition-all ${
+                  className={`p-2 sm:p-4 rounded-lg font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                     selectedCategory === 'jkssb'
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -775,14 +775,14 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
 
             {/* Subject Selection */}
             {selectedCategory && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Select Subject</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="mb-6 sm:mb-8">
+                <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Select Subject</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                   {getSubjects().map((subject) => (
                     <button
                       key={subject}
                       onClick={() => setSelectedSubject(subject)}
-                      className={`p-4 rounded-lg font-semibold transition-all ${
+                      className={`p-2 sm:p-4 rounded-lg font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                         selectedSubject === subject
                           ? 'bg-cyan-600 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -796,11 +796,11 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
             )}
 
             {/* Start Button */}
-            <div className="flex justify-center mt-12">
+            <div className="flex justify-center mt-8 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-200\">
               <button
                 onClick={startQuiz}
                 disabled={!selectedCategory || !selectedSubject}
-                className={`px-8 py-4 rounded-lg font-bold text-white text-lg transition-all ${
+                className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-white text-sm sm:text-base lg:text-lg transition-all ${
                   !selectedCategory || !selectedSubject
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg transform hover:scale-105'
@@ -815,15 +815,15 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
 
       {/* Quiz Stage */}
       {stage === 'quiz' && currentQuestion && (
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-12">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
             {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold text-gray-700">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-2">
+                <span className="font-semibold text-xs sm:text-sm lg:text-base text-gray-700">
                   Question {currentQuestionIndex + 1} of {questions.length}
                 </span>
-                <span className="text-sm text-gray-600">
+                <span className="text-xs sm:text-sm text-gray-600 break-words">
                   {selectedCategory.startsWith('class')
                     ? classMappings[selectedCategory as keyof typeof classMappings]
                     : selectedCategory === 'neetFoundation'
@@ -834,32 +834,32 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                   - {selectedSubject}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-blue-600 h-1.5 sm:h-2 rounded-full transition-all duration-300"
                   style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
                 ></div>
               </div>
             </div>
 
             {/* Question */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h3>
-              <p className="text-sm text-gray-600 mb-4">Topic: {currentQuestion.topic}</p>
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-base sm:text-lg lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-6 leading-snug">{currentQuestion.question}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4">Topic: {currentQuestion.topic}</p>
 
               {/* Options */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {currentQuestion.options.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
-                    className={`w-full p-4 text-left rounded-lg border-2 font-semibold transition-all ${
+                    className={`w-full p-3 sm:p-4 text-left rounded-lg border-2 font-semibold transition-all text-xs sm:text-sm lg:text-base ${
                       answers[currentQuestionIndex] === index
                         ? 'border-blue-600 bg-blue-50 text-blue-900'
                         : 'border-gray-200 bg-gray-50 text-gray-800 hover:border-blue-300'
                     }`}
                   >
-                    <span className="mr-3">
+                    <span className="mr-2 sm:mr-3">
                       {String.fromCharCode(65 + index)}.
                     </span>
                     {option}
@@ -869,11 +869,11 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between gap-4">
+            <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4 pt-4 sm:pt-0">
               <button
                 onClick={handlePrevious}
                 disabled={currentQuestionIndex === 0}
-                className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                   currentQuestionIndex === 0
                     ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -883,7 +883,7 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
               </button>
               <button
                 onClick={handleNext}
-                className="px-6 py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg transition-all"
+                className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg transition-all text-sm sm:text-base"
               >
                 {currentQuestionIndex === questions.length - 1 ? 'Finish' : 'Next'}
               </button>
@@ -894,14 +894,14 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
 
       {/* Results Stage */}
       {stage === 'results' && (
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Quiz Complete!</h2>
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-12">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Quiz Complete!</h2>
 
             {/* Score Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-8 mb-8">
-              <div className="flex justify-center mb-8">
-                <div className="relative w-40 h-40">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+              <div className="flex justify-center mb-6 sm:mb-8">
+                <div className="relative w-32 sm:w-40 h-32 sm:h-40">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                     <circle
                       cx="60"
@@ -923,52 +923,52 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-bold text-blue-600">{percentage}%</span>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600">{percentage}%</span>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Correct</p>
-                  <p className="text-3xl font-bold text-green-600">{correct}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Correct</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">{correct}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Total</p>
-                  <p className="text-3xl font-bold text-blue-600">{total}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Total</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">{total}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Wrong</p>
-                  <p className="text-3xl font-bold text-red-600">{total - correct}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Wrong</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600">{total - correct}</p>
                 </div>
               </div>
             </div>
 
             {/* Detailed Review */}
-            <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Question Review</h3>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Question Review</h3>
+              <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
                 {questions.map((question, index) => {
                   const isCorrect = answers[index] === question.correctAnswer;
                   return (
                     <div
                       key={question.id}
-                      className={`p-4 rounded-lg border-l-4 ${
+                      className={`p-2 sm:p-4 rounded-lg border-l-4 text-xs sm:text-sm ${
                         isCorrect
                           ? 'bg-green-50 border-green-500'
                           : 'bg-red-50 border-red-500'
                       }`}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         {isCorrect ? (
-                          <CheckCircle className="text-green-600 flex-shrink-0 mt-1" size={20} />
+                          <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5 sm:mt-1" size={16} className="sm:size-{20}" />
                         ) : (
-                          <XCircle className="text-red-600 flex-shrink-0 mt-1" size={20} />
+                          <XCircle className="text-red-600 flex-shrink-0 mt-0.5 sm:mt-1" size={16} className="sm:size-{20}" />
                         )}
-                        <div>
-                          <p className="font-semibold text-gray-900">Q{index + 1}: {question.question}</p>
-                          <p className={`text-sm mt-1 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                            {isCorrect ? 'Correct' : `Wrong - Correct answer: ${question.options[question.correctAnswer]}`}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-900 break-words">Q{index + 1}: {question.question}</p>
+                          <p className={`text-xs sm:text-sm mt-1 ${isCorrect ? 'text-green-700' : 'text-red-700'} break-words`}>
+                            {isCorrect ? 'Correct' : `Wrong - Correct: ${question.options[question.correctAnswer]}`}
                           </p>
                         </div>
                       </div>
@@ -979,17 +979,17 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-4 sm:pt-0">
               <button
                 onClick={restartQuiz}
-                className="flex-1 px-6 py-3 rounded-lg font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <RotateCcw size={20} />
+                <RotateCcw size={16} className="sm:size-{20}" />
                 Retake Quiz
               </button>
               <button
                 onClick={onBack}
-                className="flex-1 px-6 py-3 rounded-lg font-bold bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
+                className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all text-sm sm:text-base"
               >
                 Back to Home
               </button>

@@ -103,6 +103,11 @@ export default function DoubtForm({ onSubmit, onClose }: DoubtFormProps) {
               type="button"
               onClick={onClose}
               className="flex-1 bg-gray-100 text-gray-900 py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-sm sm:text-base"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
