@@ -10,15 +10,19 @@ import ScrollToTop from './components/ScrollToTop';
 import RegistrationForm from './components/RegistrationForm';
 import MockTestsQA from './components/MockTestsQA';
 import ComingSoon from './components/ComingSoon';
+import { AuthProvider } from './auth/AuthContext';
+import LoginModal from './components/LoginModal';
 
 function App() {
   const [showRegistration, setShowRegistration] = useState(false);
   const [showMockTests, setShowMockTests] = useState(false);
   const [showExpertDoubt, setShowExpertDoubt] = useState(false);
   const [comingSoonFeature, setComingSoonFeature] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white">
+    <AuthProvider>
+      <div className="min-h-screen bg-white">
       {showRegistration ? (
         <RegistrationForm onBack={() => setShowRegistration(false)} />
       ) : showMockTests ? (
@@ -29,7 +33,8 @@ function App() {
         <ComingSoon featureTitle={comingSoonFeature} onBack={() => setComingSoonFeature(null)} />
       ) : (
         <>
-          <Navbar onRegisterClick={() => setShowRegistration(true)} />
+          <Navbar onRegisterClick={() => setShowRegistration(true)} onLoginClick={() => setShowLogin(true)} />
+          <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
           <Hero onRegisterClick={() => setShowRegistration(true)} />
           <Courses />
           <Features 
@@ -41,8 +46,9 @@ function App() {
           <Footer />
           <ScrollToTop />
         </>
-      )}
-    </div>
+        )}
+        </div>
+      </AuthProvider>
   );
 }
 

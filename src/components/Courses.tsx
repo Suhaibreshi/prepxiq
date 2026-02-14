@@ -1,4 +1,5 @@
 import { BookOpen, GraduationCap, Microscope, Atom, Building2, Youtube } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
 
 const courses = [
   { id: 1, title: 'Class 6', icon: BookOpen, color: 'from-blue-500 to-blue-600', description: 'Foundation building for young learners', playlistUrl: 'https://youtube.com/playlist?list=PLoVpUIFtthPU9hwQZwd7wAG2PAeZWW1Te&si=EO4OL1w9yywZFlF5' },
@@ -15,6 +16,8 @@ const courses = [
 ];
 
 export default function Courses() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <section id="courses" className="py-16 sm:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,7 +36,14 @@ export default function Courses() {
             return (
               <div
                 key={course.id}
-                onClick={() => window.open(course.playlistUrl, '_blank')}
+                onClick={() => {
+                  const { isAuthenticated } = useAuth();
+                  if (!isAuthenticated) {
+                    alert('Please login to access lectures');
+                    return;
+                  }
+                  window.open(course.playlistUrl, '_blank');
+                }}
                 className="group relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
                 <div className={`inline-flex p-3 sm:p-4 rounded-xl bg-gradient-to-br ${course.color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
