@@ -2,7 +2,11 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import Logo from './Logo';
 
-export default function Navbar() {
+interface NavbarProps {
+  onRegisterClick?: () => void;
+}
+
+export default function Navbar({ onRegisterClick }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -26,8 +30,11 @@ export default function Navbar() {
             <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Contact
             </a>
-            <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
-              Get Started
+            <button
+              onClick={onRegisterClick}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+            >
+              Register Now
             </button>
           </div>
 
@@ -71,8 +78,14 @@ export default function Navbar() {
             >
               Contact
             </a>
-            <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
-              Get Started
+            <button
+              onClick={() => {
+                onRegisterClick?.();
+                setIsMenuOpen(false);
+              }}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            >
+              Register Now
             </button>
           </div>
         </div>

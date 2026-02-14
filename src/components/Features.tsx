@@ -33,7 +33,7 @@ const benefits = [
   { icon: Target, title: 'Result-Oriented', description: 'Focused on success' },
 ];
 
-export default function Features() {
+export default function Features({ onMockTestsClick, onExpertDoubtClick }: { onMockTestsClick?: () => void; onExpertDoubtClick?: () => void }) {
   return (
     <section id="features" className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,16 +49,27 @@ export default function Features() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-16">
           {features.map((feature) => {
             const Icon = feature.icon;
+            const isLive = feature.id === 1 || feature.id === 2 || feature.id === 3;
+            
             return (
               <div
                 key={feature.id}
-                className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-200"
+                className={`group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-200 ${isLive ? 'cursor-pointer' : 'cursor-default'}`}
+                onClick={() => {
+                  if (feature.id === 1 || feature.id === 2) {
+                    onMockTestsClick?.();
+                  } else if (feature.id === 3) {
+                    onExpertDoubtClick?.();
+                  }
+                }}
               >
-                <div className="absolute top-6 right-6">
-                  <span className="inline-flex items-center bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    Coming Soon
-                  </span>
-                </div>
+                {isLive && (
+                  <div className="absolute top-6 right-6">
+                    <span className="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                      Live Now
+                    </span>
+                  </div>
+                )}
 
                 <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.color} mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   <Icon className="text-white" size={28} />
@@ -75,6 +86,14 @@ export default function Features() {
                   <div className="w-2 h-2 rounded-full bg-blue-600"></div>
                   <span className="text-sm">{feature.stats}</span>
                 </div>
+
+                {isLive && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button className="text-blue-600 font-semibold hover:text-blue-700 text-sm flex items-center gap-1">
+                      Start Now →
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

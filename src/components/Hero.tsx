@@ -1,6 +1,10 @@
 import { ArrowRight, Sparkles } from 'lucide-react';
 
-export default function Hero() {
+interface HeroProps {
+  onRegisterClick?: () => void;
+}
+
+export default function Hero({ onRegisterClick }: HeroProps) {
   return (
     <section className="relative pt-24 sm:pt-32 pb-16 sm:pb-24 bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -25,12 +29,17 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 flex items-center justify-center space-x-2 group">
-              <span>Explore Courses</span>
+            <button
+              onClick={onRegisterClick}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 flex items-center justify-center space-x-2 group"
+            >
+              <span>Register Now</span>
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="w-full sm:w-auto bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
-              Coming Soon
+            <button 
+              onClick={() => document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })}
+              className="w-full sm:w-auto bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+              Explore Courses
             </button>
           </div>
 

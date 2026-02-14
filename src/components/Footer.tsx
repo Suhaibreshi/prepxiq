@@ -46,6 +46,14 @@ export default function Footer() {
               >
                 <Facebook size={20} />
               </a>
+              <a
+                href="https://wa.me/919149747791"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-green-500 flex items-center justify-center transition-colors duration-300"
+              >
+                <Phone size={20} />
+              </a>
             </div>
           </div>
 
@@ -89,26 +97,20 @@ export default function Footer() {
               <li className="flex items-center space-x-3">
                 <Mail size={20} className="text-blue-400 flex-shrink-0" />
                 <a
-                  href="mailto:hello.prepxiq@gmail.com"
+                  href="mailto:hello@prepxiq.com"
                   className="text-sm hover:text-blue-400 transition-colors"
                 >
-                  hello.prepxiq@gmail.com
+                  hello@prepxiq.com
                 </a>
               </li>
               <li className="flex items-start space-x-3">
                 <Phone size={20} className="text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <a
-                    href="tel:+916006645829"
+                    href="tel:+919149747791"
                     className="block hover:text-blue-400 transition-colors"
                   >
-                    +91 60066 45829
-                  </a>
-                  <a
-                    href="tel:+917006604969"
-                    className="block hover:text-blue-400 transition-colors"
-                  >
-                    +91 7006604969
+                    +91 9149747791
                   </a>
                 </div>
               </li>
