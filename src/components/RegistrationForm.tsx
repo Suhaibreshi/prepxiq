@@ -502,14 +502,6 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
                   />
                 </div>
               </div>
-                </div>
-              </div>
-                    placeholder="Timing"
-                  />
-                </div>
-              </div>
-                </div>
-              </div>
 
               {/* GUARDIAN INFORMATION SECTION */}
               <div className="p-4 sm:p-8 border-b-2 sm:border-b-4 border-blue-900">
