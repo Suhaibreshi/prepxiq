@@ -961,9 +961,9 @@ export default function MockTestsQA({ onBack }: { onBack: () => void }) {
                     >
                       <div className="flex items-start gap-2 sm:gap-3">
                         {isCorrect ? (
-                          <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5 sm:mt-1" size={16} className="sm:size-{20}" />
+                          <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5 sm:mt-1 sm:w-5 sm:h-5" size={16} />
                         ) : (
-                          <XCircle className="text-red-600 flex-shrink-0 mt-0.5 sm:mt-1" size={16} className="sm:size-{20}" />
+                          <XCircle className="text-red-600 flex-shrink-0 mt-0.5 sm:mt-1 sm:w-5 sm:h-5" size={16} />
                         )}
                         <div className="min-w-0">
                           <p className="font-semibold text-gray-900 break-words">Q{index + 1}: {question.question}</p>
