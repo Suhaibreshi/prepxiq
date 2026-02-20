@@ -11,14 +11,12 @@ import RegistrationForm from './components/RegistrationForm';
 import MockTestsQA from './components/MockTestsQA';
 import ComingSoon from './components/ComingSoon';
 import { AuthProvider } from './auth/AuthContext';
-import LoginModal from './components/LoginModal';
 
 function App() {
   const [showRegistration, setShowRegistration] = useState(false);
   const [showMockTests, setShowMockTests] = useState(false);
   const [showExpertDoubt, setShowExpertDoubt] = useState(false);
   const [comingSoonFeature, setComingSoonFeature] = useState<string | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <AuthProvider>
@@ -33,8 +31,7 @@ function App() {
         <ComingSoon featureTitle={comingSoonFeature} onBack={() => setComingSoonFeature(null)} />
       ) : (
         <>
-          <Navbar onRegisterClick={() => setShowRegistration(true)} onLoginClick={() => setShowLogin(true)} />
-          <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
+          <Navbar onRegisterClick={() => setShowRegistration(true)} />
           <Hero onRegisterClick={() => setShowRegistration(true)} />
           <Courses />
           <Features 

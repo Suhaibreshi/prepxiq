@@ -4,7 +4,6 @@ import Logo from './Logo';
 
 interface NavbarProps {
   onRegisterClick?: () => void;
-  onLoginClick?: () => void;
 }
 
 export default function Navbar({ onRegisterClick }: NavbarProps) {
@@ -36,12 +35,6 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
             >
               Register Now
-            </button>
-            <button
-              onClick={() => onLoginClick?.()}
-              className="bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50"
-            >
-              Login
             </button>
           </div>
 
@@ -93,15 +86,6 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
             >
               Register Now
-            </button>
-            <button
-              onClick={() => {
-                onLoginClick?.();
-                setIsMenuOpen(false);
-              }}
-              className="w-full mt-2 border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold"
-            >
-              Login
             </button>
           </div>
         </div>
