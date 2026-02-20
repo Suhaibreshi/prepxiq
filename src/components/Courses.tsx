@@ -37,7 +37,6 @@ export default function Courses() {
               <div
                 key={course.id}
                 onClick={() => {
-                  const { isAuthenticated } = useAuth();
                   if (!isAuthenticated) {
                     alert('Please login to access lectures');
                     return;
