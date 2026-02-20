@@ -1,12 +1,26 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 4000;
+
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Serve uploaded photos statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // In-memory store for OTPs (demo only)
 const otps = new Map();
@@ -15,6 +29,7 @@ function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// OTP Routes
 app.post('/api/send-otp', async (req, res) => {
   const { phone, channel } = req.body || {};
   if (!phone) return res.status(400).json({ message: 'phone required' });
@@ -62,6 +77,41 @@ app.post('/api/verify-otp', (req, res) => {
   return res.json({ token: `demo-token-${phone}-${Date.now()}` });
 });
 
+// Registration Routes
+const registrationRoutes = require('./routes/registrations');
+app.use('/api/registrations', registrationRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ success: false, message: 'Invalid JSON' });
+  }
+  
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, message: 'File too large. Maximum size is 5MB.' });
+  }
+  
+  if (err.message && err.message.includes('Invalid file type')) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  
+  res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
+});
+
 app.listen(PORT, () => {
-  console.log(`OTP server listening on port ${PORT}`);
+  console.log(`PREP X IQ Server running on port ${PORT}`);
+  console.log(`API available at http://localhost:${PORT}/api`);
+  console.log(`Registration API: http://localhost:${PORT}/api/registrations`);
 });

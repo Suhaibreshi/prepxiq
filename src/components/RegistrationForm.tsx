@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Loader2 } from 'lucide-react';
+
+// API base URL - change this to match your server
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 interface FormDataType {
   registrationNumber: string;
@@ -39,7 +42,7 @@ const generateRegistrationNumber = (): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  const random = String(Math.floor(Math.random() * 10000)).padStart(5, '0');
+  const random = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
   return `REG-${year}${month}${day}-${random}`;
 };
 
@@ -84,6 +87,9 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [photoError, setPhotoError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [serverRegistrationNumber, setServerRegistrationNumber] = useState('');
 
   // Auto-generate registration number and date on component mount
   useEffect(() => {
@@ -161,45 +167,98 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
     setShowReview(true);
   };
 
-  const confirmSubmit = () => {
-    console.log('Form Data:', formData);
-    setIsSubmitted(true);
-    alert('Registration submitted successfully! Your Registration Number is: ' + formData.registrationNumber);
+  const confirmSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
 
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setFormData({
-        registrationNumber: generateRegistrationNumber(),
-        registrationReceivedOn: getCurrentDate(),
-        name: '',
-        fatherGuardianName: '',
-        gender: '',
-        currentClass: '',
-        mobileNumber: '',
-        emailAddress: '',
-        courseProgram: '',
-        batchClassTiming: '',
-        guardianName: '',
-        relationshipToStudent: '',
-        guardianPhone: '',
-        guardianAddress: '',
-        emergencyContactName: '',
-        emergencyRelationship: '',
-        emergencyPhone: '',
-        allergies: 'no',
-        allergiesList: '',
-        medicalConditions: 'no',
-        medicalConditionsList: '',
-        bloodGroup: '',
-        photoConsent: false,
-        declaration: false,
-        photoFile: null,
-        photoFileName: '',
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('fatherGuardianName', formData.fatherGuardianName);
+      submitData.append('gender', formData.gender);
+      submitData.append('currentClass', formData.currentClass);
+      submitData.append('mobileNumber', formData.mobileNumber);
+      submitData.append('emailAddress', formData.emailAddress);
+      submitData.append('courseProgram', formData.courseProgram);
+      submitData.append('batchClassTiming', formData.batchClassTiming);
+      submitData.append('guardianName', formData.guardianName);
+      submitData.append('relationshipToStudent', formData.relationshipToStudent);
+      submitData.append('guardianPhone', formData.guardianPhone);
+      submitData.append('guardianAddress', formData.guardianAddress);
+      submitData.append('emergencyContactName', formData.emergencyContactName);
+      submitData.append('emergencyRelationship', formData.emergencyRelationship);
+      submitData.append('emergencyPhone', formData.emergencyPhone);
+      submitData.append('allergies', formData.allergies);
+      submitData.append('allergiesList', formData.allergiesList);
+      submitData.append('medicalConditions', formData.medicalConditions);
+      submitData.append('medicalConditionsList', formData.medicalConditionsList);
+      submitData.append('bloodGroup', formData.bloodGroup);
+      submitData.append('photoConsent', String(formData.photoConsent));
+      submitData.append('declaration', String(formData.declaration));
+      submitData.append('registrationDate', formData.registrationReceivedOn);
+      
+      if (formData.photoFile) {
+        submitData.append('photo', formData.photoFile);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/registrations`, {
+        method: 'POST',
+        body: submitData,
       });
-      setPhotoError('');
-      setIsSubmitted(false);
-      setShowReview(false);
-    }, 3000);
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to submit registration');
+      }
+
+      // Success!
+      setServerRegistrationNumber(result.data.registration_number);
+      setIsSubmitted(true);
+      console.log('Registration saved:', result.data);
+
+      // Reset form after 5 seconds
+      setTimeout(() => {
+        setFormData({
+          registrationNumber: generateRegistrationNumber(),
+          registrationReceivedOn: getCurrentDate(),
+          name: '',
+          fatherGuardianName: '',
+          gender: '',
+          currentClass: '',
+          mobileNumber: '',
+          emailAddress: '',
+          courseProgram: '',
+          batchClassTiming: '',
+          guardianName: '',
+          relationshipToStudent: '',
+          guardianPhone: '',
+          guardianAddress: '',
+          emergencyContactName: '',
+          emergencyRelationship: '',
+          emergencyPhone: '',
+          allergies: 'no',
+          allergiesList: '',
+          medicalConditions: 'no',
+          medicalConditionsList: '',
+          bloodGroup: '',
+          photoConsent: false,
+          declaration: false,
+          photoFile: null,
+          photoFileName: '',
+        });
+        setPhotoError('');
+        setIsSubmitted(false);
+        setShowReview(false);
+        setServerRegistrationNumber('');
+      }, 5000);
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Failed to submit registration. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -282,17 +341,31 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2 sm:pt-4">
                   <button
                     onClick={() => setShowReview(false)}
-                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit Details
                   </button>
                   <button
                     onClick={confirmSubmit}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Confirm & Submit
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Confirm & Submit'
+                    )}
                   </button>
                 </div>
+                {submitError && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    <strong>Error:</strong> {submitError}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -307,9 +380,9 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Registration Successful!</h1>
                 <p className="text-sm sm:text-lg mb-2 sm:mb-4">Your registration has been submitted successfully</p>
                 <div className="bg-white text-green-600 rounded-lg px-3 sm:px-6 py-2 sm:py-3 inline-block font-bold text-base sm:text-xl">
-                  Ref: {formData.registrationNumber}
+                  Ref: {serverRegistrationNumber || formData.registrationNumber}
                 </div>
-                <p className="text-xs sm:text-sm mt-3 sm:mt-4">Please visit TITAN center for final verification and document submission</p>
+                <p className="text-xs sm:text-sm mt-3 sm:mt-4">Please visit PREP X IQ center for final verification and document submission</p>
               </div>
             </div>
           </div>

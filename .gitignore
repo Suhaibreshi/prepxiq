@@ -49,3 +49,10 @@ coverage
 # Cache
 .cache
 .eslintcache
+
+# Server-specific
+server/data/
+server/uploads/
+server/*.db
+server/*.db-journal
+server/*.db-wal
