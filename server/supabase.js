@@ -8,11 +8,23 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) in your .env file');
 }
 
-// Initialize Supabase client
+// Initialize Supabase client with timeout settings
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      // Set a 10 second timeout for all requests
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      
+      return fetch(url, {
+        ...options,
+        signal: controller.signal
+      }).finally(() => clearTimeout(timeout));
+    }
   }
 });
 
@@ -21,12 +33,15 @@ const testConnection = async () => {
   try {
     const { data, error } = await supabase.from('registrations').select('count', { count: 'exact', head: true });
     if (error && error.code !== 'PGRST116') {
-      console.error('Supabase connection test failed:', error.message);
+      console.log('Supabase connection test failed - using local SQLite fallback');
+      return false;
     } else {
       console.log('Supabase connected successfully');
+      return true;
     }
   } catch (err) {
-    console.error('Supabase connection error:', err.message);
+    console.log('Supabase connection error - using local SQLite fallback:', err.message);
+    return false;
   }
 };
 
@@ -34,3 +49,4 @@ const testConnection = async () => {
 testConnection();
 
 module.exports = supabase;
+module.exports.testConnection = testConnection;
