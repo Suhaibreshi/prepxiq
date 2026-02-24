@@ -6,7 +6,7 @@ This is the backend server for the PREP X IQ Student Registration System.
 
 - **Student Registration API**: Full CRUD operations for student registrations
 - **Photo Upload**: Support for student photo uploads (up to 5MB, JPEG/PNG)
-- **SQLite Database**: Lightweight, file-based database for easy deployment
+- **Supabase Database**: Cloud-hosted PostgreSQL database via Supabase
 - **OTP Verification**: SMS/WhatsApp OTP support via Twilio (optional)
 
 ## Quick Start
@@ -18,7 +18,21 @@ cd server
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Set Up Supabase
+
+1. Create a free account at [supabase.com](https://supabase.com)
+2. Create a new project
+3. Go to Project Settings > API and copy:
+   - **Project URL** (SUPABASE_URL)
+   - **Service Role Key** (SUPABASE_SERVICE_ROLE_KEY) - for server-side operations
+   - Or **Anon Key** (SUPABASE_ANON_KEY) - for client-side operations
+
+4. Run the SQL schema in Supabase SQL Editor:
+   - Open your Supabase project dashboard
+   - Go to SQL Editor
+   - Copy the contents of `supabase-schema.sql` and run it
+
+### 3. Configure Environment
 
 Copy `.env.example` to `.env` and configure:
 
@@ -26,7 +40,15 @@ Copy `.env.example` to `.env` and configure:
 cp .env.example .env
 ```
 
-### 3. Start the Server
+Edit `.env` with your Supabase credentials:
+
+```env
+# Supabase Configuration
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+```
+
+### 4. Start the Server
 
 ```bash
 npm start
@@ -93,15 +115,15 @@ curl -X POST http://localhost:4000/api/registrations \
 
 ## Database Schema
 
-The SQLite database is automatically created at `server/data/registrations.db`.
+The application uses Supabase (PostgreSQL) as the database. Run `supabase-schema.sql` in your Supabase SQL Editor to create the table.
 
 ### Registrations Table
 
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | BIGSERIAL | Primary key |
 | registration_number | TEXT | Unique registration number |
-| registration_date | TEXT | Date of registration |
+| registration_date | DATE | Date of registration |
 | name | TEXT | Student name |
 | father_guardian_name | TEXT | Father/Guardian name |
 | gender | TEXT | Gender (male/female/other) |
@@ -117,17 +139,17 @@ The SQLite database is automatically created at `server/data/registrations.db`.
 | emergency_contact_name | TEXT | Emergency contact name |
 | emergency_relationship | TEXT | Emergency contact relationship |
 | emergency_phone | TEXT | Emergency contact phone |
-| has_allergies | INTEGER | Has allergies (0/1) |
+| has_allergies | BOOLEAN | Has allergies |
 | allergies_list | TEXT | List of allergies |
-| has_medical_conditions | INTEGER | Has medical conditions (0/1) |
+| has_medical_conditions | BOOLEAN | Has medical conditions |
 | medical_conditions_list | TEXT | List of medical conditions |
 | blood_group | TEXT | Blood group |
-| photo_consent | INTEGER | Photo consent given (0/1) |
-| declaration_agreed | INTEGER | Declaration agreed (0/1) |
+| photo_consent | BOOLEAN | Photo consent given |
+| declaration_agreed | BOOLEAN | Declaration agreed |
 | photo_path | TEXT | Path to uploaded photo |
 | status | TEXT | Registration status |
-| created_at | TEXT | Creation timestamp |
-| updated_at | TEXT | Last update timestamp |
+| created_at | TIMESTAMPTZ | Creation timestamp |
+| updated_at | TIMESTAMPTZ | Last update timestamp |
 
 ## File Storage
 
@@ -136,12 +158,17 @@ The SQLite database is automatically created at `server/data/registrations.db`.
 - Maximum file size: 5MB
 - Allowed formats: JPEG, JPG, PNG
 
+**Note**: For production, consider using Supabase Storage for file uploads instead of local storage.
+
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | PORT | Server port | 4000 |
 | NODE_ENV | Environment | development |
+| SUPABASE_URL | Supabase project URL | - |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key | - |
+| SUPABASE_ANON_KEY | Supabase anon key (alternative) | - |
 | TWILIO_ACCOUNT_SID | Twilio Account SID | - |
 | TWILIO_AUTH_TOKEN | Twilio Auth Token | - |
 | TWILIO_WHATSAPP_FROM | Twilio WhatsApp number | - |
@@ -159,15 +186,26 @@ For production deployment:
    ```
 3. Set up a reverse proxy (nginx/Apache)
 4. Configure SSL/TLS certificates
-5. Set up regular database backups
+5. Use Supabase's connection pooling for better performance
 
-## Backup
+## Migration from SQLite
 
-To backup the database:
+If you were previously using SQLite, the data structure is compatible. You can export your SQLite data and import it into Supabase using the CSV import feature or by writing INSERT statements.
 
-```bash
-cp server/data/registrations.db server/data/registrations_backup_$(date +%Y%m%d).db
-```
+## Troubleshooting
+
+### Connection Issues
+
+1. Verify your Supabase URL and keys are correct
+2. Check if your Supabase project is running (not paused)
+3. Ensure the `registrations` table exists (run `supabase-schema.sql`)
+4. Check Row Level Security policies are configured correctly
+
+### Permission Errors
+
+If you get permission errors, make sure:
+1. You're using the Service Role Key for server-side operations
+2. RLS policies are set up correctly (see `supabase-schema.sql`)
 
 ## License
 

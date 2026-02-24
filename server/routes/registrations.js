@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const supabase = require('../supabase');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -49,17 +49,21 @@ const generateRegistrationNumber = () => {
 };
 
 // Helper function to check if registration number exists
-const isRegistrationNumberUnique = (regNum) => {
-  const stmt = db.prepare('SELECT id FROM registrations WHERE registration_number = ?');
-  const result = stmt.get(regNum);
-  return !result;
+const isRegistrationNumberUnique = async (regNum) => {
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('id')
+    .eq('registration_number', regNum)
+    .maybeSingle();
+  
+  return !data;
 };
 
 // Helper function to get unique registration number
-const getUniqueRegistrationNumber = () => {
+const getUniqueRegistrationNumber = async () => {
   let regNum = generateRegistrationNumber();
   let attempts = 0;
-  while (!isRegistrationNumberUnique(regNum) && attempts < 10) {
+  while (!(await isRegistrationNumberUnique(regNum)) && attempts < 10) {
     regNum = generateRegistrationNumber();
     attempts++;
   }
@@ -70,45 +74,41 @@ const getUniqueRegistrationNumber = () => {
 };
 
 // GET /api/registrations - List all registrations
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { status, search, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     
-    let query = 'SELECT * FROM registrations WHERE 1=1';
-    const params = [];
+    let query = supabase
+      .from('registrations')
+      .select('*', { count: 'exact' });
 
     if (status) {
-      query += ' AND status = ?';
-      params.push(status);
+      query = query.eq('status', status);
     }
 
     if (search) {
-      query += ' AND (name LIKE ? OR registration_number LIKE ? OR mobile_number LIKE ? OR email_address LIKE ?)';
-      const searchPattern = `%${search}%`;
-      params.push(searchPattern, searchPattern, searchPattern, searchPattern);
+      query = query.or(`name.ilike.%${search}%,registration_number.ilike.%${search}%,mobile_number.ilike.%${search}%,email_address.ilike.%${search}%`);
     }
 
-    // Get total count
-    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
-    const countStmt = db.prepare(countQuery);
-    const { total } = countStmt.get(...params);
+    // Add pagination and ordering
+    query = query.order('created_at', { ascending: false })
+      .range(offset, offset + parseInt(limit) - 1);
 
-    // Add pagination
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    const { data, error, count } = await query;
 
-    const stmt = db.prepare(query);
-    const registrations = stmt.all(...params);
+    if (error) {
+      throw error;
+    }
 
     res.json({
       success: true,
-      data: registrations,
+      data: data,
       pagination: {
-        total,
+        total: count,
         page: parseInt(page),
         limit: parseInt(limit),
-        totalPages: Math.ceil(total / parseInt(limit))
+        totalPages: Math.ceil(count / parseInt(limit))
       }
     });
   } catch (error) {
@@ -118,17 +118,20 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/registrations/:id - Get single registration
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const stmt = db.prepare('SELECT * FROM registrations WHERE id = ?');
-    const registration = stmt.get(id);
+    const { data, error } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (!registration) {
+    if (error || !data) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
-    res.json({ success: true, data: registration });
+    res.json({ success: true, data: data });
   } catch (error) {
     console.error('Error fetching registration:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch registration', error: error.message });
@@ -136,17 +139,20 @@ router.get('/:id', (req, res) => {
 });
 
 // GET /api/registrations/number/:regNumber - Get by registration number
-router.get('/number/:regNumber', (req, res) => {
+router.get('/number/:regNumber', async (req, res) => {
   try {
     const { regNumber } = req.params;
-    const stmt = db.prepare('SELECT * FROM registrations WHERE registration_number = ?');
-    const registration = stmt.get(regNumber);
+    const { data, error } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('registration_number', regNumber)
+      .single();
 
-    if (!registration) {
+    if (error || !data) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
-    res.json({ success: true, data: registration });
+    res.json({ success: true, data: data });
   } catch (error) {
     console.error('Error fetching registration:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch registration', error: error.message });
@@ -154,7 +160,7 @@ router.get('/number/:regNumber', (req, res) => {
 });
 
 // POST /api/registrations - Create new registration
-router.post('/', upload.single('photo'), (req, res) => {
+router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
     
@@ -164,7 +170,7 @@ router.post('/', upload.single('photo'), (req, res) => {
     }
 
     // Generate unique registration number
-    const registrationNumber = getUniqueRegistrationNumber();
+    const registrationNumber = await getUniqueRegistrationNumber();
     const registrationDate = data.registrationDate || new Date().toISOString().split('T')[0];
 
     // Handle photo path
@@ -174,48 +180,44 @@ router.post('/', upload.single('photo'), (req, res) => {
     }
 
     // Insert registration
-    const stmt = db.prepare(`
-      INSERT INTO registrations (
-        registration_number, registration_date, name, father_guardian_name,
-        gender, current_class, mobile_number, email_address, course_program,
-        batch_class_timing, guardian_name, relationship_to_student, guardian_phone,
-        guardian_address, emergency_contact_name, emergency_relationship, emergency_phone,
-        has_allergies, allergies_list, has_medical_conditions, medical_conditions_list,
-        blood_group, photo_consent, declaration_agreed, photo_path, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    const insertData = {
+      registration_number: registrationNumber,
+      registration_date: registrationDate,
+      name: data.name,
+      father_guardian_name: data.fatherGuardianName || null,
+      gender: data.gender || null,
+      current_class: data.currentClass || null,
+      mobile_number: data.mobileNumber || null,
+      email_address: data.emailAddress || null,
+      course_program: data.courseProgram || null,
+      batch_class_timing: data.batchClassTiming || null,
+      guardian_name: data.guardianName || null,
+      relationship_to_student: data.relationshipToStudent || null,
+      guardian_phone: data.guardianPhone || null,
+      guardian_address: data.guardianAddress || null,
+      emergency_contact_name: data.emergencyContactName || null,
+      emergency_relationship: data.emergencyRelationship || null,
+      emergency_phone: data.emergencyPhone || null,
+      has_allergies: data.allergies === 'yes',
+      allergies_list: data.allergiesList || null,
+      has_medical_conditions: data.medicalConditions === 'yes',
+      medical_conditions_list: data.medicalConditionsList || null,
+      blood_group: data.bloodGroup || null,
+      photo_consent: data.photoConsent === 'true' || data.photoConsent === true,
+      declaration_agreed: data.declaration === 'true' || data.declaration === true,
+      photo_path: photoPath,
+      status: 'pending'
+    };
 
-    const result = stmt.run(
-      registrationNumber,
-      registrationDate,
-      data.name,
-      data.fatherGuardianName || null,
-      data.gender || null,
-      data.currentClass || null,
-      data.mobileNumber || null,
-      data.emailAddress || null,
-      data.courseProgram || null,
-      data.batchClassTiming || null,
-      data.guardianName || null,
-      data.relationshipToStudent || null,
-      data.guardianPhone || null,
-      data.guardianAddress || null,
-      data.emergencyContactName || null,
-      data.emergencyRelationship || null,
-      data.emergencyPhone || null,
-      data.allergies === 'yes' ? 1 : 0,
-      data.allergiesList || null,
-      data.medicalConditions === 'yes' ? 1 : 0,
-      data.medicalConditionsList || null,
-      data.bloodGroup || null,
-      data.photoConsent === 'true' || data.photoConsent === true ? 1 : 0,
-      data.declaration === 'true' || data.declaration === true ? 1 : 0,
-      photoPath,
-      'pending'
-    );
+    const { data: newRegistration, error } = await supabase
+      .from('registrations')
+      .insert([insertData])
+      .select()
+      .single();
 
-    // Fetch the created registration
-    const newRegistration = db.prepare('SELECT * FROM registrations WHERE id = ?').get(result.lastInsertRowid);
+    if (error) {
+      throw error;
+    }
 
     res.status(201).json({
       success: true,
@@ -233,14 +235,19 @@ router.post('/', upload.single('photo'), (req, res) => {
 });
 
 // PUT /api/registrations/:id - Update registration
-router.put('/:id', upload.single('photo'), (req, res) => {
+router.put('/:id', upload.single('photo'), async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
 
     // Check if registration exists
-    const existing = db.prepare('SELECT * FROM registrations WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existing) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
@@ -257,49 +264,45 @@ router.put('/:id', upload.single('photo'), (req, res) => {
       photoPath = req.file.filename;
     }
 
-    // Update registration
-    const stmt = db.prepare(`
-      UPDATE registrations SET
-        name = ?, father_guardian_name = ?, gender = ?, current_class = ?,
-        mobile_number = ?, email_address = ?, course_program = ?, batch_class_timing = ?,
-        guardian_name = ?, relationship_to_student = ?, guardian_phone = ?, guardian_address = ?,
-        emergency_contact_name = ?, emergency_relationship = ?, emergency_phone = ?,
-        has_allergies = ?, allergies_list = ?, has_medical_conditions = ?, medical_conditions_list = ?,
-        blood_group = ?, photo_consent = ?, declaration_agreed = ?, photo_path = ?,
-        status = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `);
+    // Update data
+    const updateData = {
+      name: data.name || existing.name,
+      father_guardian_name: data.fatherGuardianName !== undefined ? data.fatherGuardianName : existing.father_guardian_name,
+      gender: data.gender || existing.gender,
+      current_class: data.currentClass || existing.current_class,
+      mobile_number: data.mobileNumber || existing.mobile_number,
+      email_address: data.emailAddress || existing.email_address,
+      course_program: data.courseProgram || existing.course_program,
+      batch_class_timing: data.batchClassTiming || existing.batch_class_timing,
+      guardian_name: data.guardianName !== undefined ? data.guardianName : existing.guardian_name,
+      relationship_to_student: data.relationshipToStudent !== undefined ? data.relationshipToStudent : existing.relationship_to_student,
+      guardian_phone: data.guardianPhone !== undefined ? data.guardianPhone : existing.guardian_phone,
+      guardian_address: data.guardianAddress !== undefined ? data.guardianAddress : existing.guardian_address,
+      emergency_contact_name: data.emergencyContactName !== undefined ? data.emergencyContactName : existing.emergency_contact_name,
+      emergency_relationship: data.emergencyRelationship !== undefined ? data.emergencyRelationship : existing.emergency_relationship,
+      emergency_phone: data.emergencyPhone !== undefined ? data.emergencyPhone : existing.emergency_phone,
+      has_allergies: data.allergies !== undefined ? data.allergies === 'yes' : existing.has_allergies,
+      allergies_list: data.allergiesList !== undefined ? data.allergiesList : existing.allergies_list,
+      has_medical_conditions: data.medicalConditions !== undefined ? data.medicalConditions === 'yes' : existing.has_medical_conditions,
+      medical_conditions_list: data.medicalConditionsList !== undefined ? data.medicalConditionsList : existing.medical_conditions_list,
+      blood_group: data.bloodGroup || existing.blood_group,
+      photo_consent: data.photoConsent !== undefined ? (data.photoConsent === 'true' || data.photoConsent === true) : existing.photo_consent,
+      declaration_agreed: data.declaration !== undefined ? (data.declaration === 'true' || data.declaration === true) : existing.declaration_agreed,
+      photo_path: photoPath,
+      status: data.status || existing.status,
+      updated_at: new Date().toISOString()
+    };
 
-    stmt.run(
-      data.name || existing.name,
-      data.fatherGuardianName !== undefined ? data.fatherGuardianName : existing.father_guardian_name,
-      data.gender || existing.gender,
-      data.currentClass || existing.current_class,
-      data.mobileNumber || existing.mobile_number,
-      data.emailAddress || existing.email_address,
-      data.courseProgram || existing.course_program,
-      data.batchClassTiming || existing.batch_class_timing,
-      data.guardianName !== undefined ? data.guardianName : existing.guardian_name,
-      data.relationshipToStudent !== undefined ? data.relationshipToStudent : existing.relationship_to_student,
-      data.guardianPhone !== undefined ? data.guardianPhone : existing.guardian_phone,
-      data.guardianAddress !== undefined ? data.guardianAddress : existing.guardian_address,
-      data.emergencyContactName !== undefined ? data.emergencyContactName : existing.emergency_contact_name,
-      data.emergencyRelationship !== undefined ? data.emergencyRelationship : existing.emergency_relationship,
-      data.emergencyPhone !== undefined ? data.emergencyPhone : existing.emergency_phone,
-      data.allergies !== undefined ? (data.allergies === 'yes' ? 1 : 0) : existing.has_allergies,
-      data.allergiesList !== undefined ? data.allergiesList : existing.allergies_list,
-      data.medicalConditions !== undefined ? (data.medicalConditions === 'yes' ? 1 : 0) : existing.has_medical_conditions,
-      data.medicalConditionsList !== undefined ? data.medicalConditionsList : existing.medical_conditions_list,
-      data.bloodGroup || existing.blood_group,
-      data.photoConsent !== undefined ? (data.photoConsent === 'true' || data.photoConsent === true ? 1 : 0) : existing.photo_consent,
-      data.declaration !== undefined ? (data.declaration === 'true' || data.declaration === true ? 1 : 0) : existing.declaration_agreed,
-      photoPath,
-      data.status || existing.status,
-      id
-    );
+    const { data: updated, error } = await supabase
+      .from('registrations')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
 
-    // Fetch updated registration
-    const updated = db.prepare('SELECT * FROM registrations WHERE id = ?').get(id);
+    if (error) {
+      throw error;
+    }
 
     res.json({
       success: true,
@@ -316,7 +319,7 @@ router.put('/:id', upload.single('photo'), (req, res) => {
 });
 
 // PATCH /api/registrations/:id/status - Update registration status
-router.patch('/:id/status', (req, res) => {
+router.patch('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -329,14 +332,26 @@ router.patch('/:id/status', (req, res) => {
       });
     }
 
-    const existing = db.prepare('SELECT * FROM registrations WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existing) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
-    db.prepare('UPDATE registrations SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
+    const { data: updated, error } = await supabase
+      .from('registrations')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
 
-    const updated = db.prepare('SELECT * FROM registrations WHERE id = ?').get(id);
+    if (error) {
+      throw error;
+    }
 
     res.json({
       success: true,
@@ -350,12 +365,17 @@ router.patch('/:id/status', (req, res) => {
 });
 
 // DELETE /api/registrations/:id - Delete registration
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const existing = db.prepare('SELECT * FROM registrations WHERE id = ?').get(id);
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existing) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
@@ -367,7 +387,14 @@ router.delete('/:id', (req, res) => {
       }
     }
 
-    db.prepare('DELETE FROM registrations WHERE id = ?').run(id);
+    const { error } = await supabase
+      .from('registrations')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
 
     res.json({
       success: true,
@@ -380,19 +407,46 @@ router.delete('/:id', (req, res) => {
 });
 
 // GET /api/registrations/stats/summary - Get registration statistics
-router.get('/stats/summary', (req, res) => {
+router.get('/stats/summary', async (req, res) => {
   try {
-    const totalStmt = db.prepare('SELECT COUNT(*) as total FROM registrations');
-    const { total } = totalStmt.get();
+    // Get total count
+    const { count: total, error: totalError } = await supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true });
 
-    const statusStmt = db.prepare('SELECT status, COUNT(*) as count FROM registrations GROUP BY status');
-    const statusCounts = statusStmt.all();
+    if (totalError) throw totalError;
 
-    const todayStmt = db.prepare("SELECT COUNT(*) as count FROM registrations WHERE date(created_at) = date('now')");
-    const { count: todayCount } = todayStmt.get();
+    // Get count by status
+    const { data: statusData, error: statusError } = await supabase
+      .from('registrations')
+      .select('status');
 
-    const thisMonthStmt = db.prepare("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
-    const { count: thisMonthCount } = thisMonthStmt.get();
+    if (statusError) throw statusError;
+
+    const statusCounts = statusData.reduce((acc, item) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Get today's count
+    const today = new Date().toISOString().split('T')[0];
+    const { count: todayCount, error: todayError } = await supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', today);
+
+    if (todayError) throw todayError;
+
+    // Get this month's count
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const { count: thisMonthCount, error: monthError } = await supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', monthStart.toISOString());
+
+    if (monthError) throw monthError;
 
     res.json({
       success: true,
@@ -400,10 +454,7 @@ router.get('/stats/summary', (req, res) => {
         total,
         today: todayCount,
         thisMonth: thisMonthCount,
-        byStatus: statusCounts.reduce((acc, item) => {
-          acc[item.status] = item.count;
-          return acc;
-        }, {})
+        byStatus: statusCounts
       }
     });
   } catch (error) {
