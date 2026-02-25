@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, Loader2 } from 'lucide-react';
 
-// API base URL - change this to match your server
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+// API base URL - use proxy in development, direct URL in production
+const API_BASE_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:4000')
+  : '';
 
 interface FormDataType {
   registrationNumber: string;

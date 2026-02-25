@@ -36,7 +36,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPhone(null);
   }
 
-  const API_BASE = (import.meta as any)?.env?.DEV ? 'http://localhost:4000' : '';
+  const API_BASE = import.meta.env.PROD 
+    ? (import.meta.env.VITE_API_URL || 'http://localhost:4000')
+    : '';
 
   async function sendOtp(phoneArg: string, channel: 'whatsapp' | 'sms') {
     try {
