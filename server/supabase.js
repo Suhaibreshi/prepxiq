@@ -4,32 +4,41 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) in your .env file');
-}
+let supabase = null;
+let supabaseInitialized = false;
 
-// Initialize Supabase client with timeout settings
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  },
-  global: {
-    fetch: (url, options = {}) => {
-      // Set a 10 second timeout for all requests
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-      
-      return fetch(url, {
-        ...options,
-        signal: controller.signal
-      }).finally(() => clearTimeout(timeout));
+if (supabaseUrl && supabaseServiceKey) {
+  // Initialize Supabase client with timeout settings
+  supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    },
+    global: {
+      fetch: (url, options = {}) => {
+        // Set a 10 second timeout for all requests
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        
+        return fetch(url, {
+          ...options,
+          signal: controller.signal
+        }).finally(() => clearTimeout(timeout));
+      }
     }
-  }
-});
+  });
+  supabaseInitialized = true;
+} else {
+  console.log('Supabase credentials not configured - using local SQLite fallback');
+}
 
 // Test connection
 const testConnection = async () => {
+  if (!supabase) {
+    console.log('Supabase not initialized - using local SQLite fallback');
+    return false;
+  }
+  
   try {
     const { data, error } = await supabase.from('registrations').select('count', { count: 'exact', head: true });
     if (error && error.code !== 'PGRST116') {
@@ -46,7 +55,9 @@ const testConnection = async () => {
 };
 
 // Initialize on module load
-testConnection();
+if (supabaseInitialized) {
+  testConnection();
+}
 
 module.exports = supabase;
 module.exports.testConnection = testConnection;

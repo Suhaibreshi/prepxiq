@@ -209,10 +209,24 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
         body: submitData,
       });
 
-      const result = await response.json();
+      // Get response text first to handle non-JSON responses
+      const responseText = await response.text();
+
+      // Try to parse as JSON, handle empty or non-JSON responses
+      let result;
+      if (!responseText) {
+        throw new Error('Server returned an empty response. Please ensure the server is running.');
+      }
+
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse server response:', responseText);
+        throw new Error(`Server error: ${responseText.substring(0, 100)}...`);
+      }
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Failed to submit registration');
+        throw new Error(result.message || `Server returned error: ${response.status}`);
       }
 
       // Success!

@@ -90,10 +90,7 @@ app.get('/api/health', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ success: false, message: 'Invalid JSON' });
-  }
-  
+  // Handle Multer errors
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({ success: false, message: 'File too large. Maximum size is 5MB.' });
   }
@@ -102,12 +99,14 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ success: false, message: err.message });
   }
   
+  // Always return JSON, never HTML
   res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
 });
 
-// 404 handler
+// 404 handler - must return JSON
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  console.error('Route not found:', req.method, req.url);
+  res.status(404).json({ success: false, message: 'Route not found', path: req.url });
 });
 
 app.listen(PORT, () => {

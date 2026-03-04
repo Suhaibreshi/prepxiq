@@ -5,11 +5,16 @@ const db = require('../db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const PDFDocument = require('pdfkit');
 
 // Check if Supabase is available
 let supabaseAvailable = false;
 const checkSupabaseConnection = async () => {
   try {
+    if (!supabase) {
+      supabaseAvailable = false;
+      return false;
+    }
     const { error } = await supabase.from('registrations').select('count', { count: 'exact', head: true });
     supabaseAvailable = !error;
     return supabaseAvailable;
@@ -259,13 +264,245 @@ router.get('/number/:regNumber', async (req, res) => {
   }
 });
 
+// GET /api/registrations/:id/pdf - Generate PDF for a registration and save to local storage
+router.get('/:id/pdf', async (req, res) => {
+  try {
+    const { id } = req.params;
+    let registration = null;
+    
+    // Fetch registration data from Supabase or SQLite
+    if (supabaseAvailable) {
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) {
+        return res.status(404).json({ success: false, message: 'Registration not found' });
+      }
+      registration = data;
+    } else {
+      // Use SQLite fallback
+      const stmt = db.prepare('SELECT * FROM registrations WHERE id = ?');
+      registration = stmt.get(id);
+      
+      if (!registration) {
+        return res.status(404).json({ success: false, message: 'Registration not found' });
+      }
+    }
+    
+    // Build uploads directory paths
+    const photosDir = path.join(__dirname, '..', 'uploads', 'photos');
+    const pdfsDir = path.join(__dirname, '..', 'uploads', 'pdfs');
+    
+    // Ensure pdfs directory exists
+    if (!fs.existsSync(pdfsDir)) {
+      fs.mkdirSync(pdfsDir, { recursive: true });
+    }
+    
+    let photoPath = null;
+    
+    if (registration.photo_path) {
+      photoPath = path.join(photosDir, registration.photo_path);
+    }
+    
+    // Generate PDF filename
+    const pdfFileName = `registration-${registration.registration_number}.pdf`;
+    const pdfPath = path.join(pdfsDir, pdfFileName);
+    
+    // Create PDF document and save to file
+    const doc = new PDFDocument({ margin: 50 });
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
+    
+    // Header
+    doc.fontSize(20).font('Helvetica-Bold').text('Registration Form', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(12).font('Helvetica').text(`Registration Number: ${registration.registration_number}`, { align: 'center' });
+    doc.text(`Date: ${new Date(registration.created_at).toLocaleDateString()}`, { align: 'center' });
+    doc.moveDown(2);
+    
+    // Photo section (if available)
+    if (photoPath && fs.existsSync(photoPath)) {
+      try {
+        doc.fontSize(14).font('Helvetica-Bold').text('Photo', { continued: false });
+        doc.moveDown(0.5);
+        doc.image(photoPath, {
+          fit: [150, 150],
+          align: 'left'
+        });
+        doc.moveDown(2);
+      } catch (imgErr) {
+        console.error('Error adding image to PDF:', imgErr);
+      }
+    }
+    
+    // Student Information Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Student Information');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const studentInfo = [
+      ['Name:', registration.name || 'N/A'],
+      ['Father/Guardian Name:', registration.father_guardian_name || 'N/A'],
+      ['Gender:', registration.gender || 'N/A'],
+      ['Class:', registration.current_class || 'N/A'],
+      ['Blood Group:', registration.blood_group || 'N/A']
+    ];
+    
+    studentInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Contact Information Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Contact Information');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const contactInfo = [
+      ['Mobile Number:', registration.mobile_number || 'N/A'],
+      ['Email Address:', registration.email_address || 'N/A']
+    ];
+    
+    contactInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Course Information Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Course Information');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const courseInfo = [
+      ['Course Program:', registration.course_program || 'N/A'],
+      ['Batch Timing:', registration.batch_class_timing || 'N/A']
+    ];
+    
+    courseInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Guardian Information Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Guardian Information');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const guardianInfo = [
+      ['Guardian Name:', registration.guardian_name || 'N/A'],
+      ['Relationship:', registration.relationship_to_student || 'N/A'],
+      ['Phone:', registration.guardian_phone || 'N/A'],
+      ['Address:', registration.guardian_address || 'N/A']
+    ];
+    
+    guardianInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Emergency Contact Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Emergency Contact');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const emergencyInfo = [
+      ['Contact Name:', registration.emergency_contact_name || 'N/A'],
+      ['Relationship:', registration.emergency_relationship || 'N/A'],
+      ['Phone:', registration.emergency_phone || 'N/A']
+    ];
+    
+    emergencyInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Medical Information Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Medical Information');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const hasAllergies = registration.has_allergies === true || registration.has_allergies === 1 || registration.has_allergies === 'true' ? 'Yes' : 'No';
+    const hasMedicalConditions = registration.has_medical_conditions === true || registration.has_medical_conditions === 1 || registration.has_medical_conditions === 'true' ? 'Yes' : 'No';
+    
+    const medicalInfo = [
+      ['Has Allergies:', hasAllergies],
+      ['Allergies List:', registration.allergies_list || 'N/A'],
+      ['Has Medical Conditions:', hasMedicalConditions],
+      ['Medical Conditions List:', registration.medical_conditions_list || 'N/A']
+    ];
+    
+    medicalInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    doc.moveDown(1);
+    
+    // Consent & Declaration Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Consent & Declaration');
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    
+    const photoConsent = registration.photo_consent === true || registration.photo_consent === 1 || registration.photo_consent === 'true' ? 'Yes' : 'No';
+    const declaration = registration.declaration_agreed === true || registration.declaration_agreed === 1 || registration.declaration_agreed === 'true' ? 'Yes' : 'No';
+    
+    const consentInfo = [
+      ['Photo Consent Given:', photoConsent],
+      ['Declaration Agreed:', declaration]
+    ];
+    
+    consentInfo.forEach(([label, value]) => {
+      doc.font('Helvetica-Bold').text(label, { continued: true, width: 150 });
+      doc.font('Helvetica').text(value);
+    });
+    
+    // Footer
+    doc.moveDown(2);
+    doc.fontSize(9).font('Helvetica').text('Generated on: ' + new Date().toLocaleString(), { align: 'center' });
+    
+    // Finalize PDF
+    doc.end();
+    
+    // Wait for the write stream to finish
+    await new Promise((resolve, reject) => {
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+    });
+    
+    // Return success with PDF path
+    res.json({
+      success: true,
+      message: 'PDF generated successfully',
+      pdfPath: `/uploads/pdfs/${pdfFileName}`,
+      pdfFileName: pdfFileName
+    });
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate PDF', error: error.message });
+  }
+});
+
 // POST /api/registrations - Create new registration
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
     
     // Validate required fields
-    if (!data.name) {
+    if (!data || !data.name) {
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
 
@@ -377,7 +614,12 @@ router.post('/', upload.single('photo'), async (req, res) => {
         console.error('Error cleaning up file:', e);
       }
     }
-    res.status(500).json({ success: false, message: 'Failed to create registration', error: error.message });
+    // Always return JSON response
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to create registration',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
