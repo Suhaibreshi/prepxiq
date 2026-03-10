@@ -44,7 +44,7 @@ Edit `.env` with your Supabase credentials:
 
 ```env
 # Supabase Configuration
-SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_URL=https://luvbuvwjseeurwpypvda.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ```
 
