@@ -46,6 +46,15 @@ const INITIAL: FormData = {
   declaration: false,
 };
 
+// Only letters and spaces
+const lettersOnly = (v: string) => v.replace(/[^a-zA-Z\s]/g, '');
+// Only digits
+const digitsOnly = (v: string) => v.replace(/[^0-9]/g, '');
+
+const CLASS_OPTIONS = [
+  '6th', '7th', '8th', '9th', '10th', '11th', '12th',
+];
+
 export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -53,6 +62,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [serverRegNumber, setServerRegNumber] = useState('');
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [triedSubmit, setTriedSubmit] = useState(false);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -67,15 +78,50 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   ) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+
+    let filtered = value;
+    // Filter name fields – letters & spaces only
+    if (name === 'name' || name === 'fatherName') {
+      filtered = lettersOnly(value);
+    }
+    // Filter mobile – digits only, max 10
+    if (name === 'mobileNumber') {
+      filtered = digitsOnly(value).slice(0, 10);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : filtered }));
   };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  // Validation rules
+  const errors: Record<string, string> = {};
+  if (!formData.name.trim()) errors.name = 'Name is required';
+  if (formData.mobileNumber && formData.mobileNumber.length !== 10) errors.mobileNumber = 'Must be 10 digits';
+  if (formData.emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) errors.emailAddress = 'Invalid email';
+  if (!formData.declaration) errors.declaration = 'Required';
+
+  const showError = (field: string) => (touched[field] || triedSubmit) && errors[field];
+
+  const inputClass = (field: string) =>
+    `w-full px-3 sm:px-4 py-2 text-sm border rounded focus:outline-none transition-colors ${showError(field)
+      ? 'border-red-500 bg-red-50 focus:border-red-500'
+      : 'border-gray-300 focus:border-blue-500'
+    }`;
+
+  const selectClass = (field: string) =>
+    `w-full px-3 sm:px-4 py-2 text-sm border rounded focus:outline-none transition-colors ${showError(field)
+      ? 'border-red-500 bg-red-50 focus:border-red-500'
+      : 'border-gray-300 focus:border-blue-500'
+    }`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.declaration) {
-      alert('Please agree to the declaration.');
-      return;
-    }
+    setTriedSubmit(true);
+
+    if (Object.keys(errors).length > 0) return;
     setShowReview(true);
   };
 
@@ -87,14 +133,14 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
       const { data, error } = await supabase
         .from('registrations')
         .insert([{
-          name: formData.name,
-          father_name: formData.fatherName,
+          name: formData.name.trim(),
+          father_name: formData.fatherName.trim(),
           gender: formData.gender,
           current_class: formData.currentClass,
           mobile_number: formData.mobileNumber,
-          email_address: formData.emailAddress,
-          course_program: formData.courseProgram,
-          batch_class_timing: formData.batchClassTiming,
+          email_address: formData.emailAddress.trim(),
+          course_program: formData.courseProgram.trim(),
+          batch_class_timing: formData.batchClassTiming.trim(),
           registration_date: formData.registrationDate,
           declaration_agreed: formData.declaration,
           status: 'pending',
@@ -112,6 +158,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
         setIsSubmitted(false);
         setShowReview(false);
         setServerRegNumber('');
+        setTouched({});
+        setTriedSubmit(false);
       }, 5000);
     } catch (err) {
       console.error('Submission error:', err);
@@ -232,10 +280,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-12 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
         {onBack && (
-          <button
-            onClick={onBack}
-            className="mb-4 sm:mb-6 flex items-center gap-1 sm:gap-2 text-blue-900 hover:text-blue-700 transition-colors text-sm sm:text-base"
-          >
+          <button onClick={onBack}
+            className="mb-4 sm:mb-6 flex items-center gap-1 sm:gap-2 text-blue-900 hover:text-blue-700 transition-colors text-sm sm:text-base">
             <ChevronLeft size={18} />
             <span>Back to Home</span>
           </button>
@@ -266,7 +312,7 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-b-lg shadow-lg overflow-hidden">
+        <form onSubmit={handleSubmit} className="bg-white rounded-b-lg shadow-lg overflow-hidden" noValidate>
           {/* Registration Info (auto-generated, read-only) */}
           <div className="p-4 sm:p-8 border-b-2 sm:border-b-4 border-blue-900">
             <h2 className="bg-blue-900 text-white px-3 sm:px-4 py-2 text-center font-bold mb-4 sm:mb-6 rounded text-sm sm:text-base">
@@ -304,30 +350,38 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
               STUDENT INFORMATION
             </h2>
             <div className="space-y-4 sm:space-y-6">
+              {/* Row 1: Name + Father's Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Name: <span className="text-red-500">*</span>
                   </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="Full name" />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange}
+                    onBlur={() => handleBlur('name')}
+                    className={inputClass('name')}
+                    placeholder="Full name (letters only)" />
+                  {showError('name') && (
+                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Father's Name:
                   </label>
                   <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="Father's name" />
+                    onBlur={() => handleBlur('fatherName')}
+                    className={inputClass('fatherName')}
+                    placeholder="Father's name (letters only)" />
                 </div>
               </div>
 
+              {/* Row 2: Gender + Class + Mobile */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Gender:</label>
                   <select name="gender" value={formData.gender} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                    onBlur={() => handleBlur('gender')}
+                    className={selectClass('gender')}>
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -336,26 +390,41 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Current Class / Qualification:
+                    Current Class:
                   </label>
-                  <input type="text" name="currentClass" value={formData.currentClass} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="Class/Qualification" />
+                  <select name="currentClass" value={formData.currentClass} onChange={handleChange}
+                    onBlur={() => handleBlur('currentClass')}
+                    className={selectClass('currentClass')}>
+                    <option value="">Select Class</option>
+                    {CLASS_OPTIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Mobile Number:</label>
                   <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="10-digit mobile number" />
+                    onBlur={() => handleBlur('mobileNumber')}
+                    className={inputClass('mobileNumber')}
+                    placeholder="10-digit number"
+                    inputMode="numeric" />
+                  {showError('mobileNumber') && (
+                    <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>
+                  )}
                 </div>
               </div>
 
+              {/* Row 3: Email + Course + Batch */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Email Address:</label>
                   <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    onBlur={() => handleBlur('emailAddress')}
+                    className={inputClass('emailAddress')}
                     placeholder="email@example.com" />
+                  {showError('emailAddress') && (
+                    <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
@@ -388,13 +457,16 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 I have read and understood the terms, conditions, and media consent of PREP X IQ.
               </p>
             </div>
-            <label className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+            <label className={`flex items-start gap-2 sm:gap-3 text-xs sm:text-sm ${triedSubmit && !formData.declaration ? 'text-red-600' : ''}`}>
               <input type="checkbox" name="declaration" checked={formData.declaration} onChange={handleChange}
-                className="w-4 h-4 mt-0.5 sm:mt-1" />
-              <span className="text-gray-700">
+                className={`w-4 h-4 mt-0.5 sm:mt-1 ${triedSubmit && !formData.declaration ? 'accent-red-500' : ''}`} />
+              <span className={triedSubmit && !formData.declaration ? 'text-red-600 font-semibold' : 'text-gray-700'}>
                 I agree to the declaration above <span className="text-red-500">*</span>
               </span>
             </label>
+            {triedSubmit && !formData.declaration && (
+              <p className="text-red-500 text-xs mt-2">You must agree to the declaration to proceed</p>
+            )}
           </div>
 
           {/* Submit */}
