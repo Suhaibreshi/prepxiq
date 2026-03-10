@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap, User, Users } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface FormData {
@@ -340,26 +340,20 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                     Full Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input type="text" name="name" value={formData.name} onChange={handleChange}
-                      onBlur={() => handleBlur('name')}
-                      className={`${fieldClass('name')} !pl-10`}
-                      placeholder="Letters only" />
-                  </div>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange}
+                    onBlur={() => handleBlur('name')}
+                    className={fieldClass('name')}
+                    placeholder="Full name (letters only)" />
                   {showError('name') && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                     Father's Name
                   </label>
-                  <div className="relative">
-                    <Users size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
-                      onBlur={() => handleBlur('fatherName')}
-                      className={`${fieldClass('fatherName')} !pl-10`}
-                      placeholder="Letters only" />
-                  </div>
+                  <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
+                    onBlur={() => handleBlur('fatherName')}
+                    className={fieldClass('fatherName')}
+                    placeholder="Father's name (letters only)" />
                 </div>
               </div>
 
@@ -387,14 +381,11 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
-                  <div className="relative">
-                    <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
-                      onBlur={() => handleBlur('mobileNumber')}
-                      className={`${fieldClass('mobileNumber')} !pl-10`}
-                      placeholder="10 digits"
-                      inputMode="numeric" />
-                  </div>
+                  <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
+                    onBlur={() => handleBlur('mobileNumber')}
+                    className={fieldClass('mobileNumber')}
+                    placeholder="10-digit mobile number"
+                    inputMode="numeric" />
                   {showError('mobileNumber') && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
                 </div>
               </div>
@@ -403,23 +394,17 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
-                  <div className="relative">
-                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
-                      onBlur={() => handleBlur('emailAddress')}
-                      className={`${fieldClass('emailAddress')} !pl-10`}
-                      placeholder="email@example.com" />
-                  </div>
+                  <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
+                    onBlur={() => handleBlur('emailAddress')}
+                    className={fieldClass('emailAddress')}
+                    placeholder="email@example.com" />
                   {showError('emailAddress') && <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>}
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Course / Program</label>
-                  <div className="relative">
-                    <GraduationCap size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
-                      className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all !pl-10"
-                      placeholder="Course name" />
-                  </div>
+                  <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
+                    className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all"
+                    placeholder="Course name" />
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Batch / Timing</label>
