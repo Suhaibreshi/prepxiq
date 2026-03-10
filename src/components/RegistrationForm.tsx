@@ -286,7 +286,7 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
             onClick={onBack}
             className="mb-4 sm:mb-6 flex items-center gap-1 sm:gap-2 text-blue-900 hover:text-blue-700 transition-colors text-sm sm:text-base"
           >
-            <ChevronLeft size={18} className="sm:size-{20}" />
+            <ChevronLeft size={18} className="sm:size-[20px]" />
             <span>Back to Home</span>
           </button>
         )}
@@ -296,7 +296,7 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
           <div className="mb-4 sm:mb-8">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden border-2 sm:border-4 border-green-600">
               <div className="bg-green-600 text-white p-4 sm:p-8 text-center">
-                <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:size-{64}" />
+                <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:size-[64px]" />
                 <h1 className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">PLEASE REVIEW YOUR DETAILS</h1>
                 <p className="text-sm sm:text-lg">Verify all information before final submission at TITAN</p>
               </div>
@@ -392,7 +392,7 @@ const RegistrationForm = ({ onBack }: RegistrationFormProps) => {
           <div className="mb-4 sm:mb-8">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden border-2 sm:border-4 border-green-600">
               <div className="bg-green-600 text-white p-4 sm:p-8 text-center">
-                <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:size-{64}" />
+                <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:size-[64px]" />
                 <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Registration Successful!</h1>
                 <p className="text-sm sm:text-lg mb-2 sm:mb-4">Your registration has been submitted successfully</p>
                 <div className="bg-white text-green-600 rounded-lg px-3 sm:px-6 py-2 sm:py-3 inline-block font-bold text-base sm:text-xl">
