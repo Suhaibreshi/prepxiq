@@ -341,10 +341,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                     Full Name <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <input type="text" name="name" value={formData.name} onChange={handleChange}
                       onBlur={() => handleBlur('name')}
-                      className={`${fieldClass('name')} pl-9`}
+                      className={`${fieldClass('name')} !pl-10`}
                       placeholder="Letters only" />
                   </div>
                   {showError('name') && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -354,10 +354,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                     Father's Name
                   </label>
                   <div className="relative">
-                    <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Users size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
                       onBlur={() => handleBlur('fatherName')}
-                      className={`${fieldClass('fatherName')} pl-9`}
+                      className={`${fieldClass('fatherName')} !pl-10`}
                       placeholder="Letters only" />
                   </div>
                 </div>
@@ -388,10 +388,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
                   <div className="relative">
-                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
                       onBlur={() => handleBlur('mobileNumber')}
-                      className={`${fieldClass('mobileNumber')} pl-9`}
+                      className={`${fieldClass('mobileNumber')} !pl-10`}
                       placeholder="10 digits"
                       inputMode="numeric" />
                   </div>
@@ -404,10 +404,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
                   <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
                       onBlur={() => handleBlur('emailAddress')}
-                      className={`${fieldClass('emailAddress')} pl-9`}
+                      className={`${fieldClass('emailAddress')} !pl-10`}
                       placeholder="email@example.com" />
                   </div>
                   {showError('emailAddress') && <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>}
@@ -415,9 +415,9 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Course / Program</label>
                   <div className="relative">
-                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <GraduationCap size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
-                      className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all pl-9"
+                      className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all !pl-10"
                       placeholder="Course name" />
                   </div>
                 </div>
@@ -442,10 +442,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
               I have read and understood the terms, conditions, and media consent of PREP X IQ.
             </div>
             <label className={`flex items-center gap-3 text-sm cursor-pointer select-none p-3 rounded-xl border-2 transition-all ${triedSubmit && !formData.declaration
-                ? 'border-red-300 bg-red-50'
-                : formData.declaration
-                  ? 'border-emerald-300 bg-emerald-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+              ? 'border-red-300 bg-red-50'
+              : formData.declaration
+                ? 'border-emerald-300 bg-emerald-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
               }`}>
               <input type="checkbox" name="declaration" checked={formData.declaration} onChange={handleChange}
                 className="w-4 h-4 rounded accent-emerald-600" />
