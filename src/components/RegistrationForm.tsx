@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap, User, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface FormData {
@@ -46,14 +46,10 @@ const INITIAL: FormData = {
   declaration: false,
 };
 
-// Only letters and spaces
 const lettersOnly = (v: string) => v.replace(/[^a-zA-Z\s]/g, '');
-// Only digits
 const digitsOnly = (v: string) => v.replace(/[^0-9]/g, '');
 
-const CLASS_OPTIONS = [
-  '6th', '7th', '8th', '9th', '10th', '11th', '12th',
-];
+const CLASS_OPTIONS = ['6th', '7th', '8th', '9th', '10th', '11th', '12th'];
 
 export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL);
@@ -73,54 +69,34 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     }));
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-
     let filtered = value;
-    // Filter name fields – letters & spaces only
-    if (name === 'name' || name === 'fatherName') {
-      filtered = lettersOnly(value);
-    }
-    // Filter mobile – digits only, max 10
-    if (name === 'mobileNumber') {
-      filtered = digitsOnly(value).slice(0, 10);
-    }
-
+    if (name === 'name' || name === 'fatherName') filtered = lettersOnly(value);
+    if (name === 'mobileNumber') filtered = digitsOnly(value).slice(0, 10);
     setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : filtered }));
   };
 
-  const handleBlur = (field: string) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
+  const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
-  // Validation rules
   const errors: Record<string, string> = {};
   if (!formData.name.trim()) errors.name = 'Name is required';
   if (formData.mobileNumber && formData.mobileNumber.length !== 10) errors.mobileNumber = 'Must be 10 digits';
-  if (formData.emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) errors.emailAddress = 'Invalid email';
+  if (formData.emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) errors.emailAddress = 'Invalid email format';
   if (!formData.declaration) errors.declaration = 'Required';
 
   const showError = (field: string) => (touched[field] || triedSubmit) && errors[field];
 
-  const inputClass = (field: string) =>
-    `w-full px-3 sm:px-4 py-2 text-sm border rounded focus:outline-none transition-colors ${showError(field)
-      ? 'border-red-500 bg-red-50 focus:border-red-500'
-      : 'border-gray-300 focus:border-blue-500'
-    }`;
-
-  const selectClass = (field: string) =>
-    `w-full px-3 sm:px-4 py-2 text-sm border rounded focus:outline-none transition-colors ${showError(field)
-      ? 'border-red-500 bg-red-50 focus:border-red-500'
-      : 'border-gray-300 focus:border-blue-500'
+  const fieldClass = (field: string) =>
+    `w-full px-3 sm:px-4 py-2.5 text-sm border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${showError(field)
+      ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+      : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300'
     }`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTriedSubmit(true);
-
     if (Object.keys(errors).length > 0) return;
     setShowReview(true);
   };
@@ -128,7 +104,6 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   const confirmSubmit = async () => {
     setIsSubmitting(true);
     setSubmitError('');
-
     try {
       const { data, error } = await supabase
         .from('registrations')
@@ -146,13 +121,10 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
           status: 'pending',
         }])
         .select();
-
       if (error) throw new Error(error.message || 'Failed to submit registration');
-
       setServerRegNumber(formData.registrationNumber);
       setIsSubmitted(true);
       console.log('Registration saved:', data);
-
       setTimeout(() => {
         setFormData({ ...INITIAL, registrationNumber: generateRegNumber(), registrationDate: todayISO() });
         setIsSubmitted(false);
@@ -169,33 +141,44 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     }
   };
 
-  /* ───── REVIEW SCREEN ───── */
+  /* ═══════ REVIEW SCREEN ═══════ */
   if (showReview && !isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-12 px-3 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden border-2 sm:border-4 border-green-600">
-            <div className="bg-green-600 text-white p-4 sm:p-8 text-center">
-              <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:w-16 sm:h-16" />
-              <h1 className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">PLEASE REVIEW YOUR DETAILS</h1>
-              <p className="text-sm sm:text-lg">Verify all information before final submission</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-100 py-6 sm:py-12 px-3 sm:px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+            {/* Review Header */}
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white p-6 sm:p-10 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mb-16" />
+              <div className="relative z-10">
+                <div className="inline-flex p-3 bg-white/20 rounded-full mb-4">
+                  <CheckCircle size={40} />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">Review Your Details</h1>
+                <p className="text-emerald-100 text-sm sm:text-base">Please verify all information before final submission</p>
+              </div>
             </div>
 
-            <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border-l-4 border-blue-900">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Registration Number</p>
-                  <p className="text-lg sm:text-2xl font-bold text-blue-900 mt-1">{formData.registrationNumber}</p>
+            <div className="p-5 sm:p-8 space-y-5">
+              {/* Reg Info Cards */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-3 sm:p-4 rounded-xl border border-blue-200">
+                  <p className="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wider">Reg. Number</p>
+                  <p className="text-sm sm:text-lg font-bold text-blue-900 mt-1 font-mono">{formData.registrationNumber}</p>
                 </div>
-                <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border-l-4 border-blue-900">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Registration Date</p>
-                  <p className="text-lg sm:text-2xl font-bold text-blue-900 mt-1">{formData.registrationDate}</p>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-3 sm:p-4 rounded-xl border border-blue-200">
+                  <p className="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wider">Date</p>
+                  <p className="text-sm sm:text-lg font-bold text-blue-900 mt-1">{formData.registrationDate}</p>
                 </div>
               </div>
 
-              <div className="bg-gray-100 p-3 sm:p-4 rounded-lg">
-                <h3 className="font-bold text-gray-800 mb-3 text-base sm:text-lg">Student Information</h3>
-                <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+              {/* Details Grid */}
+              <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-200">
+                <h3 className="font-bold text-gray-800 mb-4 text-sm sm:text-base flex items-center gap-2">
+                  <User size={16} className="text-blue-600" /> Student Information
+                </h3>
+                <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-3 sm:gap-y-4 text-xs sm:text-sm">
                   {([
                     ['Name', formData.name],
                     ['Father\'s Name', formData.fatherName],
@@ -206,44 +189,33 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                     ['Course', formData.courseProgram],
                     ['Batch Timing', formData.batchClassTiming],
                   ] as [string, string][]).map(([label, val]) => (
-                    <div key={label}>
-                      <p className="text-gray-600 font-semibold">{label}:</p>
-                      <p className="text-gray-900 font-bold break-words">{val || '-'}</p>
+                    <div key={label} className="border-b border-gray-200 pb-2">
+                      <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider">{label}</p>
+                      <p className="text-gray-900 font-semibold break-words mt-0.5">{val || '—'}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 sm:p-4 rounded text-xs sm:text-sm">
-                <p className="text-gray-700">
-                  <span className="font-bold">Important:</span> Please review all details carefully.
-                  Once submitted, you will need to visit our center for final verification.
+              <div className="bg-amber-50 border border-amber-200 p-3 sm:p-4 rounded-xl text-xs sm:text-sm">
+                <p className="text-amber-800">
+                  <span className="font-bold">Note:</span> Once submitted, please visit our center for final verification and document submission.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2 sm:pt-4">
-                <button
-                  onClick={() => setShowReview(false)}
-                  disabled={isSubmitting}
-                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base disabled:opacity-50"
-                >
-                  Edit Details
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button onClick={() => setShowReview(false)} disabled={isSubmitting}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all text-sm border border-gray-300 disabled:opacity-50">
+                  ← Edit Details
                 </button>
-                <button
-                  onClick={confirmSubmit}
-                  disabled={isSubmitting}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded transition-colors text-sm sm:text-base disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <><Loader2 className="animate-spin" size={20} /> Submitting...</>
-                  ) : (
-                    'Confirm & Submit'
-                  )}
+                <button onClick={confirmSubmit} disabled={isSubmitting}
+                  className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all text-sm shadow-lg shadow-emerald-200 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {isSubmitting ? (<><Loader2 className="animate-spin" size={18} /> Submitting...</>) : 'Confirm & Submit ✓'}
                 </button>
               </div>
 
               {submitError && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                   <strong>Error:</strong> {submitError}
                 </div>
               )}
@@ -254,20 +226,26 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     );
   }
 
-  /* ───── SUCCESS SCREEN ───── */
+  /* ═══════ SUCCESS SCREEN ═══════ */
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-12 px-3 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden border-2 sm:border-4 border-green-600">
-            <div className="bg-green-600 text-white p-4 sm:p-8 text-center">
-              <CheckCircle size={48} className="mx-auto mb-2 sm:mb-4 sm:w-16 sm:h-16" />
-              <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Registration Successful!</h1>
-              <p className="text-sm sm:text-lg mb-2 sm:mb-4">Your registration has been submitted successfully</p>
-              <div className="bg-white text-green-600 rounded-lg px-3 sm:px-6 py-2 sm:py-3 inline-block font-bold text-base sm:text-xl">
-                Ref: {serverRegNumber || formData.registrationNumber}
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-100 py-6 sm:py-12 px-3 sm:px-4 flex items-center">
+        <div className="max-w-lg mx-auto w-full">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white p-8 sm:p-12 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mb-16" />
+              <div className="relative z-10">
+                <div className="inline-flex p-4 bg-white/20 rounded-full mb-4">
+                  <CheckCircle size={48} />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">Registration Successful!</h1>
+                <p className="text-emerald-100 mb-6">Your registration has been submitted</p>
+                <div className="bg-white text-emerald-700 rounded-xl px-6 py-3 inline-block font-bold text-lg font-mono shadow-lg">
+                  {serverRegNumber || formData.registrationNumber}
+                </div>
+                <p className="text-emerald-200 text-xs sm:text-sm mt-5">Please visit PREP X IQ center for final verification</p>
               </div>
-              <p className="text-xs sm:text-sm mt-3 sm:mt-4">Please visit PREP X IQ center for final verification</p>
             </div>
           </div>
         </div>
@@ -275,209 +253,220 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     );
   }
 
-  /* ───── MAIN FORM ───── */
+  /* ═══════ MAIN FORM ═══════ */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-12 px-3 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-100 py-6 sm:py-12 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
         {onBack && (
           <button onClick={onBack}
-            className="mb-4 sm:mb-6 flex items-center gap-1 sm:gap-2 text-blue-900 hover:text-blue-700 transition-colors text-sm sm:text-base">
-            <ChevronLeft size={18} />
-            <span>Back to Home</span>
+            className="mb-4 sm:mb-6 flex items-center gap-2 text-gray-600 hover:text-blue-700 transition-colors text-sm font-medium group">
+            <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            Back to Home
           </button>
         )}
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 sm:p-8 rounded-t-lg shadow-lg">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-6">
+        {/* ── Header ── */}
+        <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white p-6 sm:p-10 rounded-t-2xl shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-6">
             <div>
-              <h1 className="text-3xl sm:text-5xl font-bold mb-1 sm:mb-2">STUDENT</h1>
-              <h1 className="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6">REGISTRATION FORM</h1>
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4">
+                <GraduationCap size={14} />
+                <span className="text-xs font-medium tracking-wider uppercase">PREP X IQ</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+                Student<br />Registration
+              </h1>
             </div>
-            <div className="text-right text-xs sm:text-sm space-y-1 sm:space-y-2">
-              <p className="flex items-center gap-1 sm:gap-2 justify-end">
-                <span className="text-base sm:text-lg">📞</span>
-                <span>+91 9149747791</span>
-              </p>
-              <p className="flex items-center gap-1 sm:gap-2 justify-end">
-                <span className="text-base sm:text-lg">✉️</span>
-                <span className="break-all">hello@prepxiq.com</span>
-              </p>
-              <p className="flex items-center gap-1 sm:gap-2 justify-end">
-                <span className="text-base sm:text-lg">📍</span>
-                <span>Achabol, Near J&K BANK</span>
-              </p>
+            <div className="text-sm space-y-2.5 sm:text-right">
+              <div className="flex items-center gap-2.5 sm:justify-end">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Phone size={14} />
+                </div>
+                <span className="font-medium">+91 9149747791</span>
+              </div>
+              <div className="flex items-center gap-2.5 sm:justify-end">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Mail size={14} />
+                </div>
+                <span className="font-medium">hello@prepxiq.com</span>
+              </div>
+              <div className="flex items-center gap-2.5 sm:justify-end">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={14} />
+                </div>
+                <span className="font-medium">Achabol, Near J&K BANK</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-b-lg shadow-lg overflow-hidden" noValidate>
-          {/* Registration Info (auto-generated, read-only) */}
-          <div className="p-4 sm:p-8 border-b-2 sm:border-b-4 border-blue-900">
-            <h2 className="bg-blue-900 text-white px-3 sm:px-4 py-2 text-center font-bold mb-4 sm:mb-6 rounded text-sm sm:text-base">
-              REGISTRATION INFORMATION
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                  Registration Number: <span className="text-blue-900">*</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="w-full px-3 sm:px-4 py-2 border-2 border-blue-200 rounded bg-blue-50 text-blue-900 font-bold text-sm">
-                    {formData.registrationNumber}
-                  </div>
-                  <span className="text-xs text-gray-600 font-semibold whitespace-nowrap">AUTO-GEN</span>
-                </div>
+        {/* ── Form Body ── */}
+        <form onSubmit={handleSubmit} className="bg-white rounded-b-2xl shadow-xl overflow-hidden border border-t-0 border-gray-200" noValidate>
+
+          {/* Registration Info */}
+          <div className="p-5 sm:p-8 border-b border-gray-200">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-1 h-6 bg-blue-600 rounded-full" />
+              <h2 className="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide">Registration Information</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100/30 p-4 rounded-xl border border-blue-200">
+                <p className="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Registration Number</p>
+                <p className="text-base sm:text-lg font-bold text-blue-900 font-mono">{formData.registrationNumber}</p>
+                <p className="text-[10px] text-blue-500 mt-1">Auto-generated</p>
               </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                  Registration Date: <span className="text-blue-900">*</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="w-full px-3 sm:px-4 py-2 border-2 border-blue-200 rounded bg-blue-50 text-blue-900 font-bold text-sm">
-                    {formData.registrationDate}
-                  </div>
-                  <span className="text-xs text-gray-600 font-semibold whitespace-nowrap">TODAY</span>
-                </div>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100/30 p-4 rounded-xl border border-blue-200">
+                <p className="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Registration Date</p>
+                <p className="text-base sm:text-lg font-bold text-blue-900">{formData.registrationDate}</p>
+                <p className="text-[10px] text-blue-500 mt-1">Today's date</p>
               </div>
             </div>
           </div>
 
           {/* Student Information */}
-          <div className="p-4 sm:p-8 border-b-2 sm:border-b-4 border-blue-900">
-            <h2 className="bg-blue-900 text-white px-3 sm:px-4 py-2 text-center font-bold mb-4 sm:mb-6 rounded text-sm sm:text-base">
-              STUDENT INFORMATION
-            </h2>
-            <div className="space-y-4 sm:space-y-6">
-              {/* Row 1: Name + Father's Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+          <div className="p-5 sm:p-8 border-b border-gray-200">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-1 h-6 bg-blue-600 rounded-full" />
+              <h2 className="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide">Student Information</h2>
+            </div>
+
+            <div className="space-y-5">
+              {/* Name + Father */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Name: <span className="text-red-500">*</span>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                    Full Name <span className="text-red-500">*</span>
                   </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange}
-                    onBlur={() => handleBlur('name')}
-                    className={inputClass('name')}
-                    placeholder="Full name (letters only)" />
-                  {showError('name') && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                  )}
+                  <div className="relative">
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="text" name="name" value={formData.name} onChange={handleChange}
+                      onBlur={() => handleBlur('name')}
+                      className={`${fieldClass('name')} pl-9`}
+                      placeholder="Letters only" />
+                  </div>
+                  {showError('name') && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Father's Name:
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                    Father's Name
                   </label>
-                  <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
-                    onBlur={() => handleBlur('fatherName')}
-                    className={inputClass('fatherName')}
-                    placeholder="Father's name (letters only)" />
+                  <div className="relative">
+                    <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange}
+                      onBlur={() => handleBlur('fatherName')}
+                      className={`${fieldClass('fatherName')} pl-9`}
+                      placeholder="Letters only" />
+                  </div>
                 </div>
               </div>
 
-              {/* Row 2: Gender + Class + Mobile */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+              {/* Gender + Class + Mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Gender:</label>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Gender</label>
                   <select name="gender" value={formData.gender} onChange={handleChange}
                     onBlur={() => handleBlur('gender')}
-                    className={selectClass('gender')}>
-                    <option value="">Select Gender</option>
+                    className={fieldClass('gender')}>
+                    <option value="">Select</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Current Class:
-                  </label>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Current Class</label>
                   <select name="currentClass" value={formData.currentClass} onChange={handleChange}
                     onBlur={() => handleBlur('currentClass')}
-                    className={selectClass('currentClass')}>
+                    className={fieldClass('currentClass')}>
                     <option value="">Select Class</option>
-                    {CLASS_OPTIONS.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    {CLASS_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Mobile Number:</label>
-                  <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
-                    onBlur={() => handleBlur('mobileNumber')}
-                    className={inputClass('mobileNumber')}
-                    placeholder="10-digit number"
-                    inputMode="numeric" />
-                  {showError('mobileNumber') && (
-                    <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>
-                  )}
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange}
+                      onBlur={() => handleBlur('mobileNumber')}
+                      className={`${fieldClass('mobileNumber')} pl-9`}
+                      placeholder="10 digits"
+                      inputMode="numeric" />
+                  </div>
+                  {showError('mobileNumber') && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
                 </div>
               </div>
 
-              {/* Row 3: Email + Course + Batch */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+              {/* Email + Course + Batch */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Email Address:</label>
-                  <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
-                    onBlur={() => handleBlur('emailAddress')}
-                    className={inputClass('emailAddress')}
-                    placeholder="email@example.com" />
-                  {showError('emailAddress') && (
-                    <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>
-                  )}
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
+                      onBlur={() => handleBlur('emailAddress')}
+                      className={`${fieldClass('emailAddress')} pl-9`}
+                      placeholder="email@example.com" />
+                  </div>
+                  {showError('emailAddress') && <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>}
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Course / Program:
-                  </label>
-                  <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="Course name" />
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Course / Program</label>
+                  <div className="relative">
+                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
+                      className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all pl-9"
+                      placeholder="Course name" />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Batch / Class Timing:
-                  </label>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Batch / Timing</label>
                   <input type="text" name="batchClassTiming" value={formData.batchClassTiming} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                    placeholder="Timing" />
+                    className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all"
+                    placeholder="e.g. Morning 9-11 AM" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Declaration */}
-          <div className="p-4 sm:p-8 border-b-2 sm:border-b-4 border-blue-900 bg-gray-50">
-            <h2 className="bg-blue-900 text-white px-3 sm:px-4 py-2 text-center font-bold mb-4 sm:mb-6 rounded text-sm sm:text-base">
-              DECLARATION
-            </h2>
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-white rounded border border-gray-300 text-xs sm:text-sm">
-              <p className="text-gray-700 leading-relaxed">
-                I hereby declare that all the information provided above is true and correct to the best of my knowledge.
-                I have read and understood the terms, conditions, and media consent of PREP X IQ.
-              </p>
+          <div className="p-5 sm:p-8 bg-gray-50/50 border-b border-gray-200">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-1 h-6 bg-blue-600 rounded-full" />
+              <h2 className="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide">Declaration</h2>
             </div>
-            <label className={`flex items-start gap-2 sm:gap-3 text-xs sm:text-sm ${triedSubmit && !formData.declaration ? 'text-red-600' : ''}`}>
+            <div className="mb-5 p-4 bg-white rounded-xl border border-gray-200 text-xs sm:text-sm leading-relaxed text-gray-600">
+              I hereby declare that all the information provided above is true and correct to the best of my knowledge.
+              I have read and understood the terms, conditions, and media consent of PREP X IQ.
+            </div>
+            <label className={`flex items-center gap-3 text-sm cursor-pointer select-none p-3 rounded-xl border-2 transition-all ${triedSubmit && !formData.declaration
+                ? 'border-red-300 bg-red-50'
+                : formData.declaration
+                  ? 'border-emerald-300 bg-emerald-50'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}>
               <input type="checkbox" name="declaration" checked={formData.declaration} onChange={handleChange}
-                className={`w-4 h-4 mt-0.5 sm:mt-1 ${triedSubmit && !formData.declaration ? 'accent-red-500' : ''}`} />
-              <span className={triedSubmit && !formData.declaration ? 'text-red-600 font-semibold' : 'text-gray-700'}>
+                className="w-4 h-4 rounded accent-emerald-600" />
+              <span className={`font-medium ${triedSubmit && !formData.declaration ? 'text-red-700' : formData.declaration ? 'text-emerald-700' : 'text-gray-700'}`}>
                 I agree to the declaration above <span className="text-red-500">*</span>
               </span>
             </label>
             {triedSubmit && !formData.declaration && (
-              <p className="text-red-500 text-xs mt-2">You must agree to the declaration to proceed</p>
+              <p className="text-red-500 text-xs mt-2 ml-1">You must agree to the declaration to proceed</p>
             )}
           </div>
 
           {/* Submit */}
-          <div className="p-4 sm:p-8 bg-gray-50 border-t-2 sm:border-t-4 border-blue-900 flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <div className="p-5 sm:p-8 flex flex-col sm:flex-row gap-3">
             <button type="submit"
-              className="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 sm:py-3 px-3 sm:px-6 rounded transition-colors text-sm sm:text-base">
+              className="flex-1 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all text-sm shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 hover:-translate-y-0.5">
               Review & Submit Registration
             </button>
             {onBack && (
               <button type="button" onClick={onBack}
-                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 sm:py-3 px-3 sm:px-6 rounded transition-colors text-sm sm:text-base">
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all text-sm border border-gray-300">
                 Cancel
               </button>
             )}
