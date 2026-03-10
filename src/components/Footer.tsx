@@ -89,7 +89,7 @@ export default function Footer() {
               <li className="flex items-start gap-2 sm:gap-3">
                 <MapPin size={16} className="sm:size-{20} text-blue-400 flex-shrink-0 mt-0.5" />
                 <span className="leading-relaxed">
-                  Achabal, Anantnag
+                  Achabal Anantna. 
                   <br />
                   Near Smart Kids School
                 </span>
