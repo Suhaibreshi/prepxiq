@@ -1,11 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase env vars. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.')
-}
+// Supabase anon key is a PUBLIC client-side key — safe to include in source
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://luvbuvwjseeurwpypvda.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1dmJ1dndqc2VldXJ3cHlwdmRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDI3NTcsImV4cCI6MjA4NzUxODc1N30.QE1R4sDDjWF9NSTwogXRUtpGp1p1h4LjbBh8mcVjdaI'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
