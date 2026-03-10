@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PREPX IQ - Smart exam preparation for Class 6-12, Foundation, NEET, JEE & JKSSB. Quality education and expert guidance for serious results." />
+    <!-- Fix Referrer Policy warning for external analytics -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>PREPX IQ - Smart Preparation for Serious Results</title>
+    <script>
+      // Diagnostic: Log all external resource requests
+      (function() {
+        console.log('[DIAG] Page loaded at:', new Date().toISOString());
+        console.log('[DIAG] User Agent:', navigator.userAgent);
+        
+        // Monitor external script loading
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tag) {
+          const element = originalCreateElement.apply(this, arguments);
+          if (tag === 'script') {
+            const originalSrc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+            Object.defineProperty(element, 'src', {
+              set: function(value) {
+                console.log('[DIAG] Script src set:', value);
+                originalSrc.set.call(this, value);
+              },
+              get: originalSrc.get
+            });
+          }
+          return element;
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
