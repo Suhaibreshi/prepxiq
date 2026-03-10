@@ -17,7 +17,7 @@ build
 
 # Environment files
 .env
-.env.local
+# .env.local — committed intentionally (contains only public anon key)
 .env.development.local
 .env.test.local
 .env.production.local
