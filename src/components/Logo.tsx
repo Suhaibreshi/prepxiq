@@ -1,9 +1,9 @@
-export default function Logo({ className = "h-16 sm:h-24", invert = false }) {
+export default function Logo({ className = "h-8 sm:h-12", invert = false }) {
   return (
     <img
-      src="/3.png"
+      src="/header-logo.png"
       alt="PREPX IQ"
-      className={`${className} ${invert ? 'brightness-0 invert' : ''}`}
+      className={`object-contain w-auto ${className} ${invert ? 'brightness-0 invert' : ''}`}
     />
   );
 }

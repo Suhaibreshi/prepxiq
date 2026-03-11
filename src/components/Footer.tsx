@@ -1,5 +1,4 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react';
-import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -8,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
           <div className="lg:col-span-2">
             <div className="mb-3 sm:mb-4">
-              <Logo className="h-10 sm:h-14 lg:h-16" invert={true} />
+              <img src="/footer-logo.png" alt="PREPX IQ" className="h-10 sm:h-14 lg:h-16 object-contain mix-blend-screen brightness-200 contrast-125" />
             </div>
             <p className="text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6 max-w-md leading-relaxed">
               PREPX IQ is your trusted partner for comprehensive exam preparation. We're committed to helping students achieve their academic dreams with quality education and expert guidance.
