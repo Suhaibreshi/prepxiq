@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface FormData {
@@ -49,10 +49,34 @@ const INITIAL: FormData = {
 const lettersOnly = (v: string) => v.replace(/[^a-zA-Z\s]/g, '');
 const digitsOnly = (v: string) => v.replace(/[^0-9]/g, '');
 
-const CLASS_OPTIONS = ['6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+const CLASS_OPTIONS = ['6th', '7th', '8th', '9th', '10th', '11th', '12th', '12+'];
+
+const COURSE_CATEGORIES = [
+  {
+    name: 'Foundation',
+    options: ['6th Class', '7th Class', '8th Class', '9th Class', '10th Class']
+  },
+  {
+    name: 'Science',
+    options: ['11th - PCM', '12th - PCM', '11th - PCB', '12th - PCB']
+  },
+  {
+    name: 'Arts',
+    options: ['11th - Arts', '12th - Arts']
+  },
+  {
+    name: 'Commerce',
+    options: ['11th - Commerce', '12th - Commerce']
+  },
+  {
+    name: 'Competitive Exams',
+    options: ['JEE', 'NEET', 'JKSSB']
+  }
+];
 
 export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL);
+  const [courseCategory, setCourseCategory] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +108,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
   if (!formData.name.trim()) errors.name = 'Name is required';
   if (formData.mobileNumber && formData.mobileNumber.length !== 10) errors.mobileNumber = 'Must be 10 digits';
   if (formData.emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) errors.emailAddress = 'Invalid email format';
+  if (!courseCategory) errors.courseCategory = 'Category is required';
+  if (courseCategory && !formData.courseProgram) errors.courseProgram = 'Course is required';
   if (!formData.declaration) errors.declaration = 'Required';
 
   const showError = (field: string) => (touched[field] || triedSubmit) && errors[field];
@@ -127,6 +153,7 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
       console.log('Registration saved:', data);
       setTimeout(() => {
         setFormData({ ...INITIAL, registrationNumber: generateRegNumber(), registrationDate: todayISO() });
+        setCourseCategory('');
         setIsSubmitted(false);
         setShowReview(false);
         setServerRegNumber('');
@@ -186,8 +213,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                     ['Class', formData.currentClass],
                     ['Mobile', formData.mobileNumber],
                     ['Email', formData.emailAddress],
-                    ['Course', formData.courseProgram],
-                    ['Batch Timing', formData.batchClassTiming],
+                    ['Course', `${courseCategory} - ${formData.courseProgram}`],
+                    ['Timing', formData.batchClassTiming],
                   ] as [string, string][]).map(([label, val]) => (
                     <div key={label} className="border-b border-gray-200 pb-2">
                       <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider">{label}</p>
@@ -297,7 +324,7 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
                   <MapPin size={14} />
                 </div>
-                <span className="font-medium">Achabol, Near J&K BANK</span>
+                <span className="font-medium">Achabal, Anantnag</span>
               </div>
             </div>
           </div>
@@ -390,8 +417,8 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                 </div>
               </div>
 
-              {/* Email + Course + Batch */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Email + Batch */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
                   <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
@@ -401,16 +428,57 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
                   {showError('emailAddress') && <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>}
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Course / Program</label>
-                  <input type="text" name="courseProgram" value={formData.courseProgram} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all"
-                    placeholder="Course name" />
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Timing</label>
+                  <select name="batchClassTiming" value={formData.batchClassTiming} onChange={handleChange}
+                    onBlur={() => handleBlur('batchClassTiming')}
+                    className={fieldClass('batchClassTiming')}>
+                    <option value="">Select Timing</option>
+                    <option value="Morning">Morning</option>
+                    <option value="Evening">Evening</option>
+                  </select>
                 </div>
+              </div>
+
+              {/* Course Category + Selected Course */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Batch / Timing</label>
-                  <input type="text" name="batchClassTiming" value={formData.batchClassTiming} onChange={handleChange}
-                    className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200 hover:border-gray-300 transition-all"
-                    placeholder="e.g. Morning 9-11 AM" />
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                    Category <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={courseCategory}
+                    onChange={(e) => {
+                      setCourseCategory(e.target.value);
+                      setFormData(prev => ({ ...prev, courseProgram: '' }));
+                      handleBlur('courseCategory');
+                    }}
+                    onBlur={() => handleBlur('courseCategory')}
+                    className={fieldClass('courseCategory')}
+                  >
+                    <option value="">Select Category</option>
+                    {COURSE_CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                  </select>
+                  {showError('courseCategory') && <p className="text-red-500 text-xs mt-1">{errors.courseCategory}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                    Course <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="courseProgram"
+                    value={formData.courseProgram}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('courseProgram')}
+                    disabled={!courseCategory}
+                    className={`${fieldClass('courseProgram')} ${!courseCategory ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''}`}
+                  >
+                    <option value="">{courseCategory ? 'Select Course' : 'Select a Category First'}</option>
+                    {COURSE_CATEGORIES.find(c => c.name === courseCategory)?.options.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                  {showError('courseProgram') && <p className="text-red-500 text-xs mt-1">{errors.courseProgram}</p>}
                 </div>
               </div>
             </div>
