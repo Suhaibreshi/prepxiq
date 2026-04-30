@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap, User } from 'lucide-react';
 
