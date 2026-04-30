@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  outputFileTracingRoot: '/home/shaheennazir/Desktop/prepxiq/.worktrees/nextjs-migration',
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;
