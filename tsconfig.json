@@ -16,6 +16,8 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
+      "@/auth/*": ["./src/auth/*"],
+      "@/lib/*": ["./lib/*"],
       "@/components/*": ["./components/*"]
     }
   },
