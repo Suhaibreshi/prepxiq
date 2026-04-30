@@ -21,6 +21,6 @@
       "@/components/*": ["./components/*"]
     }
   },
-  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "components/**/*.ts", "components/**/*.tsx", "src/auth/**/*.ts", "src/auth/**/*.tsx", "lib/**/*.ts", "lib/**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "components/**/*.ts", "components/**/*.tsx", "src/auth/**/*.ts", "src/auth/**/*.tsx", "lib/**/*.ts", "lib/**/*.tsx", "types/**/*.d.ts", ".next/types/**/*.ts"],
   "exclude": ["node_modules", "server", "src/main.tsx", "src/pages", "src/App.tsx"]
 }
