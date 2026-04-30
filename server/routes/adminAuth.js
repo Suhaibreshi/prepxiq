@@ -5,12 +5,10 @@ const jwt = require('jsonwebtoken');
 const supabase = require('../supabase');
 const { ADMIN_JWT_SECRET } = require('../middleware/adminAuth');
 
-// Login rate limiting (in-memory)
 const loginAttempts = new Map();
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const WINDOW_MS = 15 * 60 * 1000;
 
-// POST /admin/login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
 
@@ -18,7 +16,6 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Username and password required' });
   }
 
-  // Rate limit check
   const ip = req.ip || req.connection.remoteAddress || 'unknown';
   const key = `login:${ip}`;
   const record = loginAttempts.get(key);
@@ -32,7 +29,6 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  // Fetch admin
   const { data: admin, error } = await supabase
     .from('admin_users')
     .select('id, username, password_hash')
@@ -69,12 +65,10 @@ router.post('/login', async (req, res) => {
   return res.json({ success: true, token, username: admin.username });
 });
 
-// POST /admin/logout
 router.post('/logout', (req, res) => {
   return res.json({ success: true, message: 'Logged out' });
 });
 
-// GET /admin/me
 router.get('/me', require('../middleware/adminAuth').adminAuth, (req, res) => {
   return res.json({ success: true, username: req.adminUser.username });
 });
