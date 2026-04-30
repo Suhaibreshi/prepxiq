@@ -94,6 +94,10 @@ app.use('/admin', adminAuthRoutes);
 const adminDashboardRoutes = require('./routes/adminDashboard');
 app.use('/admin/api', adminDashboardRoutes);
 
+// Admin Courses API
+const adminCoursesRoutes = require('./routes/adminCourses');
+app.use('/admin/api', adminCoursesRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
