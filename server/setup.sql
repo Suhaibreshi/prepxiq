@@ -32,7 +32,7 @@ CREATE TABLE registrations (
   -- Emergency contact
   emergency_contact_name   TEXT,
   emergency_relationship   TEXT,
-  emergency_phone           TEXT,
+  emergency_phone          TEXT,
 
   -- Medical
   has_allergies            BOOLEAN DEFAULT FALSE,
@@ -82,3 +82,29 @@ DROP POLICY IF EXISTS "public_delete" ON registrations;
 CREATE POLICY "backend_delete" ON registrations
   FOR DELETE TO anon, authenticated
   USING (auth.role() = 'service_role');
+
+-- ============================================================
+-- Admin Panel Tables
+-- ============================================================
+
+-- Admin users table
+CREATE TABLE IF NOT EXISTS admin_users (
+  id BIGSERIAL PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Courses table
+CREATE TABLE IF NOT EXISTS courses (
+  id BIGSERIAL PRIMARY KEY,
+  category TEXT NOT NULL,
+  program TEXT NOT NULL,
+  batch_timing TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(category, program)
+);
+
+-- Index for courses lookup
+CREATE INDEX IF NOT EXISTS idx_courses_category ON courses(category);
