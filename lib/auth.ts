@@ -3,7 +3,10 @@ import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import { supabaseAdmin } from './supabase';
 
-const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'prepxiq-admin-secret';
+const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET;
+if (!ADMIN_JWT_SECRET) {
+  throw new Error('ADMIN_JWT_SECRET environment variable is required');
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
