@@ -86,6 +86,10 @@ app.post('/api/verify-otp', (req, res) => {
 const registrationRoutes = require('./routes/registrations');
 app.use('/api/registrations', registrationRoutes);
 
+// Admin Auth Routes
+const adminAuthRoutes = require('./routes/adminAuth');
+app.use('/admin', adminAuthRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

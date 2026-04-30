@@ -1,6 +1,8 @@
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
+import { useAuth } from '../auth/AuthContext';
 
 interface NavbarProps {
   onRegisterClick?: () => void;
@@ -51,6 +53,7 @@ const courseCategories = [
 ];
 
 export default function Navbar({ onRegisterClick }: NavbarProps) {
+  const { isAuthenticated, phone, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
@@ -167,12 +170,24 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
             <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Contact
             </a>
-            <button
-              onClick={onRegisterClick}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              Register Now
-            </button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 text-sm">{phone?.replace(/(\+91)(\d{5})(\d{5})/, '$1 $2 ****')}</span>
+                <button
+                  onClick={logout}
+                  className="text-gray-500 hover:text-red-600 text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           <button
@@ -268,15 +283,38 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
             >
               Contact
             </a>
-            <button
-              onClick={() => {
-                onRegisterClick?.();
-                setIsMenuOpen(false);
-              }}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
-            >
-              Register Now
-            </button>
+            {isAuthenticated ? (
+              <>
+                <div className="px-4 py-2 text-gray-500 text-sm">
+                  {phone?.replace(/(\+91)(\d{5})(\d{5})/, '+91 $2 ****')}
+                </div>
+                <button
+                  onClick={() => { logout(); setIsMenuOpen(false); }}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+                >
+                  Login
+                </Link>
+                <button
+                  onClick={() => {
+                    onRegisterClick?.();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+                >
+                  Register Now
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

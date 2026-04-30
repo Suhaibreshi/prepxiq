@@ -36,14 +36,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPhone(null);
   }
 
-  // OTP functionality is disabled - backend has been removed
-  // These functions now return an error message
-  async function sendOtp(_phone: string, _channel: 'whatsapp' | 'sms') {
-    return { ok: false, message: 'OTP verification is currently unavailable. Please contact support.' };
+  async function sendOtp(phoneNumber: string, channel: 'whatsapp' | 'sms'): Promise<{ ok: boolean; message?: string }> {
+    try {
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber, channel }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        return { ok: true, message: data.message };
+      }
+      return { ok: false, message: data.message || 'Failed to send OTP' };
+    } catch {
+      return { ok: false, message: 'Network error. Please try again.' };
+    }
   }
 
-  async function verifyOtp(_phone: string, _otp: string) {
-    return { ok: false, message: 'OTP verification is currently unavailable. Please contact support.' };
+  async function verifyOtp(phoneNumber: string, otp: string): Promise<{ ok: boolean; token?: string; message?: string }> {
+    try {
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber, otp }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        loginWithToken(data.token, phoneNumber);
+        return { ok: true, token: data.token };
+      }
+      return { ok: false, message: data.message || 'Invalid OTP' };
+    } catch {
+      return { ok: false, message: 'Network error. Please try again.' };
+    }
   }
 
   const value: AuthContextType = {

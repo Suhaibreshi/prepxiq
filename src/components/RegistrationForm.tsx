@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, Loader2, Phone, Mail, MapPin, GraduationCap, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface FormData {
   registrationNumber: string;
@@ -131,26 +130,28 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     setIsSubmitting(true);
     setSubmitError('');
     try {
-      const { data, error } = await supabase
-        .from('registrations')
-        .insert([{
-          name: formData.name.trim(),
-          father_name: formData.fatherName.trim(),
-          gender: formData.gender,
-          current_class: formData.currentClass,
-          mobile_number: formData.mobileNumber,
-          email_address: formData.emailAddress.trim(),
-          course_program: formData.courseProgram.trim(),
-          batch_class_timing: formData.batchClassTiming.trim(),
-          registration_date: formData.registrationDate,
-          declaration_agreed: formData.declaration,
-          status: 'pending',
-        }])
-        .select();
-      if (error) throw new Error(error.message || 'Failed to submit registration');
-      setServerRegNumber(formData.registrationNumber);
+      const payload = new FormData();
+      payload.append('name', formData.name.trim());
+      payload.append('fatherGuardianName', formData.fatherName.trim());
+      payload.append('gender', formData.gender);
+      payload.append('currentClass', formData.currentClass);
+      payload.append('mobileNumber', formData.mobileNumber);
+      payload.append('emailAddress', formData.emailAddress.trim());
+      payload.append('courseProgram', formData.courseProgram.trim());
+      payload.append('batchClassTiming', formData.batchClassTiming.trim());
+      payload.append('registrationDate', formData.registrationDate);
+      payload.append('declaration', String(formData.declaration));
+
+      const res = await fetch('/api/registrations', { method: 'POST', body: payload });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || 'Failed to submit registration');
+      }
+
+      setServerRegNumber(result.data.registration_number);
       setIsSubmitted(true);
-      console.log('Registration saved:', data);
+      console.log('Registration saved:', result.data);
       setTimeout(() => {
         setFormData({ ...INITIAL, registrationNumber: generateRegNumber(), registrationDate: todayISO() });
         setCourseCategory('');
