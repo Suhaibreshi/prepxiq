@@ -90,6 +90,10 @@ app.use('/api/registrations', registrationRoutes);
 const adminAuthRoutes = require('./routes/adminAuth');
 app.use('/admin', adminAuthRoutes);
 
+// Admin Dashboard API
+const adminDashboardRoutes = require('./routes/adminDashboard');
+app.use('/admin/api', adminDashboardRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

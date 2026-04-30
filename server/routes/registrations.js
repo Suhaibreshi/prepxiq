@@ -5,6 +5,41 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
+const nodemailer = require('nodemailer');
+
+// Email transporter
+const emailTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: process.env.SMTP_PORT || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
+
+async function sendStatusEmail(registration, newStatus) {
+  if (!registration.email_address) return;
+
+  const subject = newStatus === 'approved'
+    ? 'Your PREPX IQ Registration is Approved'
+    : 'Your PREPX IQ Registration Update';
+
+  const body = newStatus === 'approved'
+    ? `Congratulations ${registration.name},\n\nYour registration (${registration.registration_number}) for ${registration.course_program} has been approved. Welcome to PREPX IQ!\n\nBatch timing: ${registration.batch_class_timing || 'To be announced'}\n\nRegards,\nPREPX IQ Team`
+    : `Dear ${registration.name},\n\nYour registration (${registration.registration_number}) could not be approved at this time. Please contact us at hello@prepxiq.com for more information.\n\nRegards,\nPREPX IQ Team`;
+
+  try {
+    await emailTransporter.sendMail({
+      from: process.env.SMTP_FROM || 'hello@prepxiq.com',
+      to: registration.email_address,
+      subject,
+      text: body
+    });
+  } catch (err) {
+    console.error('Email send failed:', err.message);
+  }
+}
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '..', 'uploads', 'photos');
@@ -561,6 +596,51 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting registration:', error);
     res.status(500).json({ success: false, message: 'Failed to delete registration', error: error.message });
+  }
+});
+
+// PUT /api/registrations/:id/status - Admin status update
+router.put('/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body || {};
+
+  const validStatuses = ['pending', 'approved', 'rejected', 'waitlisted'];
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message: `Status must be one of: ${validStatuses.join(', ')}`
+    });
+  }
+
+  if (supabaseAvailable) {
+    const { data: current } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!current) {
+      return res.status(404).json({ success: false, message: 'Registration not found' });
+    }
+
+    const { data, error } = await supabase
+      .from('registrations')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
+
+    if (status === 'approved' || status === 'rejected') {
+      sendStatusEmail(current, status).catch(console.error);
+    }
+
+    return res.json({ success: true, data });
+  } else {
+    return res.status(503).json({ success: false, message: 'Supabase not available' });
   }
 });
 
