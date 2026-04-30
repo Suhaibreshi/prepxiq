@@ -61,3 +61,6 @@ server/uploads/
 server/*.db
 server/*.db-journal
 server/*.db-wal
+
+# Worktrees
+.worktrees/
