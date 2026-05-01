@@ -4,38 +4,32 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/auth/AuthContext';
+import { MessageSquare, Phone, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { sendOtp } = useAuth();
   const [phone, setPhone] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [channel, setChannel] = useState<'whatsapp' | 'sms'>('sms');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
     setError('');
 
-    try {
-      const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
-      });
+    const phoneNumber = `+91${phone}`;
+    const result = await sendOtp(phoneNumber, channel);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      sessionStorage.setItem('prepxiq_phone', phone);
+    if (result.ok) {
+      sessionStorage.setItem('prepxiq_phone', phoneNumber);
       router.push('/verify-otp');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.message || 'Failed to send OTP');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -61,27 +55,61 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Channel selection */}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setChannel('whatsapp')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 border rounded-lg font-medium text-sm transition-colors ${
+                  channel === 'whatsapp'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <MessageSquare size={16} />
+                WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={() => setChannel('sms')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 border rounded-lg font-medium text-sm transition-colors ${
+                  channel === 'sms'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Phone size={16} />
+                SMS
+              </button>
+            </div>
+
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Phone Number
               </label>
-              <input
-                id="phone"
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 9876543210"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-              />
+              <div className="mt-1 flex rounded-lg shadow-sm">
+                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                  +91
+                </span>
+                <input
+                  id="phone"
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="9876543210"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-none rounded-r-lg shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+              disabled={isLoading || phone.length !== 10}
+              className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
             >
-              {loading ? 'Sending...' : 'Send OTP'}
+              {isLoading && <Loader2 size={16} className="animate-spin" />}
+              {isLoading ? 'Sending...' : 'Send OTP'}
             </button>
           </form>
         </div>
