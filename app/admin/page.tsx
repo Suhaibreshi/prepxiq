@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, BookOpen, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 interface Stats {
   total: number;

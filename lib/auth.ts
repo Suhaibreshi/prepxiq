@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from './supabase';
 
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET;
@@ -48,15 +48,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token.username = (user as any).username;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).id = token.id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).username = token.username;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).role = token.role;
       }
       return session;

@@ -7,6 +7,7 @@ export const GET = auth(async function GET(req, { params }) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = (params as any).id;
   const { data, error } = await supabaseAdmin
     .from('courses')
@@ -26,6 +27,7 @@ export const PUT = auth(async function PUT(req, { params }) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = (params as any).id;
   const { category, program, batch_timing, is_active } = await req.json();
 
@@ -52,6 +54,7 @@ export const DELETE = auth(async function DELETE(req, { params }) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = (params as any).id;
   const { error } = await supabaseAdmin
     .from('courses')

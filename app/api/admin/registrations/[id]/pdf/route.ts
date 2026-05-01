@@ -62,7 +62,7 @@ export async function GET(
       pdfPath: `/uploads/pdfs/${pdfFileName}`,
       pdfFileName,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

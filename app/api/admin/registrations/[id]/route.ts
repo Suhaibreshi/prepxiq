@@ -7,6 +7,7 @@ export const GET = auth(async function GET(req, { params }) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = (params as any).id;
   const { data, error } = await supabaseAdmin
     .from('registrations')
