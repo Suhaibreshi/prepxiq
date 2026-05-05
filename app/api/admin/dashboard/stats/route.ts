@@ -4,6 +4,12 @@ import { auth } from '@/lib/auth';
 
 export const GET = auth(async function GET(req) {
   if (!req.auth) {
+    // Check if this is a browser request (has Accept header) vs API call
+    const accept = req.headers.get('accept');
+    if (accept?.includes('text/html')) {
+      // Browser request - redirect to login
+      return NextResponse.redirect(new URL('/login/admin', req.url));
+    }
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

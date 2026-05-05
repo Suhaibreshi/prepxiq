@@ -1,31 +1,13 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
-
+export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-sm">
@@ -35,11 +17,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <h1 className="text-xl font-bold">PREPX IQ Admin</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="/admin" className="text-gray-700 hover:text-primary">Dashboard</a>
-              <a href="/admin/registrations" className="text-gray-700 hover:text-primary">Registrations</a>
-              <a href="/admin/courses" className="text-gray-700 hover:text-primary">Courses</a>
+              <Link href="/admin" className="text-gray-700 hover:text-primary">Dashboard</Link>
+              <Link href="/admin/registrations" className="text-gray-700 hover:text-primary">Registrations</Link>
+              <Link href="/admin/courses" className="text-gray-700 hover:text-primary">Courses</Link>
               <button
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: '/login/admin' })}
                 className="text-gray-700 hover:text-red-600"
               >
                 Sign Out

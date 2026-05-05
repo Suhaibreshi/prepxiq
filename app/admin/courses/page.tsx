@@ -25,7 +25,7 @@ export default function CoursesPage() {
 
   const loadCourses = async () => {
     try {
-      const res = await fetch('/admin/api/courses');
+      const res = await fetch('/api/admin/courses');
       const data = await res.json();
       if (data.success) setCourses(data.data);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +44,7 @@ export default function CoursesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this course?')) return;
     try {
-      await fetch(`/admin/api/courses/${id}`, { method: 'DELETE' });
+      await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
       loadCourses();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

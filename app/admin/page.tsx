@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Users, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 interface Stats {
@@ -13,21 +15,60 @@ interface Stats {
 }
 
 export default function AdminDashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/admin/api/dashboard/stats')
-      .then((res) => res.json())
+    if (status === 'unauthenticated') {
+      router.push('/login/admin');
+      return;
+    }
+    if (status === 'authenticated') {
+      fetchStats();
+    }
+  }, [status, router]);
+
+  const fetchStats = () => {
+    fetch('/api/admin/dashboard/stats')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
       .then((data) => {
         if (data.success) setStats(data.data);
+        setLoading(false);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => {
+        console.error('Stats fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  };
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="mt-2 text-gray-600">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Error: {error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const statCards = [

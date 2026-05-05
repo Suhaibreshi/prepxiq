@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/lib/auth';
+import bcrypt from 'bcryptjs';
 
 export const PUT = auth(async function PUT(req, { params }) {
   if (!req.auth) {
@@ -38,6 +39,26 @@ export const PUT = auth(async function PUT(req, { params }) {
 
   if (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+
+  // When approved, create a user account with phone as default password
+  if (status === 'approved' && current.email_address && current.mobile_number) {
+    const defaultPassword = current.mobile_number;
+    const passwordHash = await bcrypt.hash(defaultPassword, 12);
+
+    const { error: userError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        email: current.email_address.toLowerCase(),
+        password_hash: passwordHash,
+        registration_id: current.id,
+        name: current.name,
+        is_approved: true,
+      });
+
+    if (userError) {
+      console.error('Failed to create user account:', userError);
+    }
   }
 
   return NextResponse.json({ success: true, data });

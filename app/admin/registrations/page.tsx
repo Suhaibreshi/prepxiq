@@ -67,7 +67,7 @@ export default function RegistrationsPage() {
     params.set('page', searchParams.get('page') || '1');
 
     try {
-      const res = await fetch(`/admin/api/registrations?${params}`);
+      const res = await fetch(`/api/admin/registrations?${params}`);
       const data = await res.json();
       if (data.success) {
         setRegistrations(data.data);
@@ -97,7 +97,7 @@ export default function RegistrationsPage() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/admin/api/registrations/${id}/status`, {
+      const res = await fetch(`/api/admin/registrations/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
