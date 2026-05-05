@@ -14,6 +14,8 @@ node_modules
 dist
 dist-ssr
 build
+.next
+out
 
 # Environment files
 .env
@@ -61,3 +63,7 @@ server/uploads/
 server/*.db
 server/*.db-journal
 server/*.db-wal
+server/*.db-shm
+
+# Worktrees
+.worktrees/
