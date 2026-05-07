@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Video, Globe, Link2 } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -19,7 +19,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-colors duration-300"
               >
-                <Instagram size={18} className="sm:size-{20}" />
+                <Globe size={18} className="sm:size-{20}" />
               </a>
               <a
                 href="https://youtube.com/@prepxiq"
@@ -27,7 +27,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-red-600 flex items-center justify-center transition-colors duration-300"
               >
-                <Youtube size={18} className="sm:size-{20}" />
+                <Video size={18} className="sm:size-{20}" />
               </a>
               <a
                 href="https://linkedin.com/company/prepxiq"
@@ -35,7 +35,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-blue-500 flex items-center justify-center transition-colors duration-300"
               >
-                <Linkedin size={18} className="sm:size-{20}" />
+                <Link2 size={18} className="sm:size-{20}" />
               </a>
               <a
                 href="https://facebook.com/prepxiq"
@@ -43,7 +43,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-blue-700 flex items-center justify-center transition-colors duration-300"
               >
-                <Facebook size={18} className="sm:size-{20}" />
+                <Video size={18} className="sm:size-{20}" />
               </a>
               <a
                 href="https://wa.me/919149747791"
