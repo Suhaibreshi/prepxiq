@@ -5,6 +5,7 @@ export const POST = async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
+    const registrationNumber = formData.get('registrationNumber') as string;
     const name = formData.get('name') as string;
     const fatherGuardianName = formData.get('fatherGuardianName') as string;
     const gender = formData.get('gender') as string;
@@ -35,6 +36,7 @@ export const POST = async function POST(req: Request) {
     const { data, error } = await supabaseAdmin
       .from('registrations')
       .insert({
+        registration_number: registrationNumber,
         name: name.trim(),
         father_guardian_name: fatherGuardianName?.trim() || null,
         gender: gender || null,

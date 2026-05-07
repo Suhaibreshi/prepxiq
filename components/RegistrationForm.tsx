@@ -133,6 +133,7 @@ export default function RegistrationForm({ onBack }: RegistrationFormProps) {
     setSubmitError('');
     try {
       const payload = new FormData();
+      payload.append('registrationNumber', formData.registrationNumber);
       payload.append('name', formData.name.trim());
       payload.append('fatherGuardianName', formData.fatherName.trim());
       payload.append('gender', formData.gender);
