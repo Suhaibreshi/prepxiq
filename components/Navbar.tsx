@@ -55,7 +55,7 @@ const courseCategories = [
 ];
 
 export default function Navbar({ onRegisterClick }: NavbarProps) {
-  const { isAuthenticated, user, setUser } = useAuth();
+  const { isAuthenticated, logout: authLogout, phone } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
@@ -95,7 +95,7 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
   };
 
   const logout = () => {
-    setUser(null);
+    authLogout();
   };
 
   const maskPhone = (phone: string) => {
@@ -182,7 +182,7 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
             </a>
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                <span className="text-gray-600 text-sm">{user?.phone ? maskPhone(user.phone) : ''}</span>
+                <span className="text-gray-600 text-sm">{phone ? maskPhone(phone) : ''}</span>
                 <button
                   onClick={logout}
                   className="text-gray-500 hover:text-red-600 text-sm font-medium transition-colors"
@@ -296,7 +296,7 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
             {isAuthenticated ? (
               <>
                 <div className="px-4 py-2 text-gray-500 text-sm">
-                  {user?.phone ? maskPhone(user.phone) : ''}
+                  {phone ? maskPhone(phone) : ''}
                 </div>
                 <button
                   onClick={() => { logout(); setIsMenuOpen(false); }}
