@@ -54,8 +54,8 @@ function RegistrationsContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchRegistrations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const fetchRegistrations = async () => {
