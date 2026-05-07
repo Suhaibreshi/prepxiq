@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Microscope, Atom, Building2, Youtube } from 'lucide-react';
+import { BookOpen, GraduationCap, Microscope, Atom, Building2, MonitorPlay } from 'lucide-react';
 
 const courses = [
   { id: 1, title: 'Class 6', icon: BookOpen, color: 'from-blue-500 to-blue-600', description: 'Foundation building for young learners', playlistUrl: 'https://youtube.com/playlist?list=PLoVpUIFtthPU9hwQZwd7wAG2PAeZWW1Te&si=EO4OL1w9yywZFlF5' },
@@ -50,7 +50,7 @@ export default function Courses() {
                 </p>
 
                 <div className="mt-6 flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                  <Youtube size={16} className="mr-2" />
+                  <MonitorPlay size={16} className="mr-2" />
                   <span>Watch Playlist</span>
                   <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
