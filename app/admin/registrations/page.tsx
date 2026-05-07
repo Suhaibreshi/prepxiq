@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -34,7 +34,7 @@ const STATUS_COLORS: Record<string, string> = {
   waitlisted: 'bg-gray-100 text-gray-800',
 };
 
-export default function RegistrationsPage() {
+function RegistrationsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -350,5 +350,21 @@ export default function RegistrationsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function RegistrationsLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  );
+}
+
+export default function RegistrationsPage() {
+  return (
+    <Suspense fallback={<RegistrationsLoading />}>
+      <RegistrationsContent />
+    </Suspense>
   );
 }
