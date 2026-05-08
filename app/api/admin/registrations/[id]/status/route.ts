@@ -43,13 +43,17 @@ export const PUT = auth(async function PUT(req, { params }) {
 
   // When approved, create a user account with phone as default password
   if (status === 'approved' && current.email_address && current.mobile_number) {
-    const defaultPassword = current.mobile_number;
+    const email = current.email_address.toLowerCase().trim();
+    const defaultPassword = current.mobile_number.trim();
+    
+    console.log(`[StatusUpdate] Creating user for ${email} with password length ${defaultPassword.length}`);
+    
     const passwordHash = await bcrypt.hash(defaultPassword, 12);
 
     const { error: userError } = await supabaseAdmin
       .from('users')
       .insert({
-        email: current.email_address.toLowerCase(),
+        email: email,
         password_hash: passwordHash,
         registration_id: current.id,
         name: current.name,
@@ -57,7 +61,9 @@ export const PUT = auth(async function PUT(req, { params }) {
       });
 
     if (userError) {
-      console.error('Failed to create user account:', userError);
+      console.error('[StatusUpdate] Failed to create user account:', userError);
+    } else {
+      console.log(`[StatusUpdate] User account created successfully for ${email}`);
     }
   }
 

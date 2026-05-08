@@ -18,24 +18,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
+          console.log('[Auth-Admin] Missing credentials');
           return null;
         }
 
-        const { data: admin } = await supabaseAdmin
+        console.log(`[Auth-Admin] Attempting admin login for: ${credentials.username}`);
+
+        const { data: admin, error } = await supabaseAdmin
           .from('admin_users')
           .select('*')
           .eq('username', credentials.username as string)
-          .single();
+          .maybeSingle();
 
-        if (!admin) return null;
+        if (error) {
+          console.error('[Auth-Admin] Database error:', error);
+          return null;
+        }
+
+        if (!admin) {
+          console.log(`[Auth-Admin] Admin not found: ${credentials.username}`);
+          return null;
+        }
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
           admin.password_hash
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          console.log(`[Auth-Admin] Password mismatch for: ${credentials.username}`);
+          return null;
+        }
 
+        console.log(`[Auth-Admin] Admin login successful: ${credentials.username}`);
         return {
           id: admin.id,
           username: admin.username,
