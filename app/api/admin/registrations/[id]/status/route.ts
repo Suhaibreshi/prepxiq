@@ -44,9 +44,17 @@ export const PUT = auth(async function PUT(req, { params }) {
   // When approved, create a user account with phone as default password
   if (status === 'approved' && current.email_address && current.mobile_number) {
     const email = current.email_address.toLowerCase().trim();
-    const defaultPassword = current.mobile_number.trim();
+    // Forcefully clean the mobile number: convert to string, remove all non-digits, trim
+    const rawMobile = String(current.mobile_number);
+    const defaultPassword = rawMobile.replace(/\D/g, '').trim();
     
-    console.log(`[StatusUpdate] Creating user for ${email} with password length ${defaultPassword.length}`);
+    console.log(`[StatusUpdate] Creating user for ${email}`);
+    console.log(`[StatusUpdate] Raw Mobile from DB: "${rawMobile}"`);
+    console.log(`[StatusUpdate] Cleaned Password (to be hashed): "${defaultPassword}"`);
+    
+    if (defaultPassword.length < 10) {
+      console.warn(`[StatusUpdate] Warning: Cleaned password for ${email} is short: ${defaultPassword.length} chars`);
+    }
     
     const passwordHash = await bcrypt.hash(defaultPassword, 12);
 
