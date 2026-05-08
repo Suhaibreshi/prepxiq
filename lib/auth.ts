@@ -11,6 +11,7 @@ if (!ADMIN_JWT_SECRET) {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
+      id: 'admin',
       name: 'Admin Login',
       credentials: {
         username: { label: 'Username', type: 'text' },
@@ -59,6 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
     Credentials({
+      id: 'student',
       name: 'Student Login',
       credentials: {
         email: { label: 'Email', type: 'email' },

@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn('admin', {
         username,
         password,
         redirect: false,

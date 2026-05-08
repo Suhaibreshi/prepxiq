@@ -17,7 +17,7 @@ export default function StudentLoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn('student', {
         email,
         password,
         redirect: false,
