@@ -51,18 +51,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('[Auth] Missing credentials');
           return null;
         }
 
-        const { data: user } = await supabaseAdmin
+        const email = (credentials.email as string).toLowerCase().trim();
+        console.log(`[Auth] Attempting student login for: ${email}`);
+
+        const { data: user, error } = await supabaseAdmin
           .from('users')
           .select('*')
-          .eq('email', (credentials.email as string).toLowerCase())
-          .single();
+          .eq('email', email)
+          .maybeSingle();
 
-        if (!user) return null;
+        if (error) {
+          console.error('[Auth] Database error:', error);
+          return null;
+        }
+
+        if (!user) {
+          console.log(`[Auth] User not found: ${email}`);
+          return null;
+        }
+
+        console.log(`[Auth] User found, approved status: ${user.is_approved}`);
 
         if (!user.is_approved) {
+          console.log(`[Auth] User not approved: ${email}`);
           return null;
         }
 
@@ -71,8 +86,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password_hash
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          console.log(`[Auth] Password mismatch for: ${email}`);
+          // For debugging only: console.log(`[Auth] Input password: ${credentials.password}`);
+          return null;
+        }
 
+        console.log(`[Auth] Login successful for: ${email}`);
         return {
           id: user.id,
           email: user.email,
