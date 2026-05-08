@@ -10,7 +10,17 @@ interface Course {
   is_active: boolean;
 }
 
-const CATEGORIES = ['Foundation', 'Science', 'Arts', 'Commerce', 'Competitive'];
+const CATEGORIES = ['Foundation', 'Science', 'Arts', 'Commerce', 'Competitive Exams'];
+
+const PROGRAM_OPTIONS: Record<string, string[]> = {
+  'Foundation': ['6th Class', '7th Class', '8th Class', '9th Class', '10th Class'],
+  'Science': ['11th - PCM', '12th - PCM', '11th - PCB', '12th - PCB'],
+  'Arts': ['11th - Arts', '12th - Arts'],
+  'Commerce': ['11th - Commerce', '12th - Commerce'],
+  'Competitive Exams': ['JEE', 'NEET', 'JKSSB']
+};
+
+const TIMING_OPTIONS = ['Morning', 'Evening'];
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -172,13 +182,13 @@ function CourseFormModal({ course, onSave, onCancel }: CourseFormModalProps) {
       const payload = { category, program, batch_timing: batchTiming, is_active: isActive };
       let res;
       if (course) {
-        res = await fetch(`/admin/api/courses/${course.id}`, {
+        res = await fetch(`/api/admin/courses/${course.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch('/admin/api/courses', {
+        res = await fetch('/api/admin/courses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -209,7 +219,10 @@ function CourseFormModal({ course, onSave, onCancel }: CourseFormModalProps) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setProgram(''); // Reset program when category changes
+              }}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             >
@@ -223,24 +236,35 @@ function CourseFormModal({ course, onSave, onCancel }: CourseFormModalProps) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Program</label>
-            <input
-              type="text"
+            <select
               value={program}
               onChange={(e) => setProgram(e.target.value)}
               required
-              placeholder="e.g. 11th - PCM"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            />
+              disabled={!category}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:bg-gray-50"
+            >
+              <option value="">Select program</option>
+              {category && PROGRAM_OPTIONS[category]?.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Batch Timing</label>
-            <input
-              type="text"
+            <select
               value={batchTiming}
               onChange={(e) => setBatchTiming(e.target.value)}
-              placeholder="e.g. Morning, Evening"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            />
+            >
+              <option value="">Select timing</option>
+              {TIMING_OPTIONS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex items-center gap-2">
             <input
