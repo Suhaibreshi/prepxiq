@@ -65,9 +65,9 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
-  // Modals
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  // Drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerView, setDrawerView] = useState<'profile' | 'password' | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
 
   // Mobile accordion states
@@ -106,10 +106,10 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
   };
 
   useEffect(() => {
-    if (showProfileModal && !profileData) {
+    if (drawerOpen && drawerView === 'profile' && !profileData) {
       fetchProfileDetails();
     }
-  }, [showProfileModal, profileData]);
+  }, [drawerOpen, drawerView, profileData]);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -129,6 +129,13 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
 
   const handleLogout = () => {
     signOut({ callbackUrl: '/' });
+  };
+
+  const openDrawer = (view: 'profile' | 'password') => {
+    setDrawerView(view);
+    setDrawerOpen(true);
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
   };
 
   return (
@@ -228,7 +235,7 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
                     </div>
                     
                     <button
-                      onClick={() => { setShowProfileModal(true); setIsProfileOpen(false); }}
+                      onClick={() => openDrawer('profile')}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       <User size={18} />
@@ -236,7 +243,7 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
                     </button>
                     
                     <button
-                      onClick={() => { setShowPasswordModal(true); setIsProfileOpen(false); }}
+                      onClick={() => openDrawer('password')}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       <Key size={18} />
@@ -365,14 +372,14 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
                   <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                 </div>
                 <button
-                  onClick={() => { setShowProfileModal(true); setIsMenuOpen(false); }}
+                  onClick={() => openDrawer('profile')}
                   className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
                 >
                   <User size={18} />
                   My Profile
                 </button>
                 <button
-                  onClick={() => { setShowPasswordModal(true); setIsMenuOpen(false); }}
+                  onClick={() => openDrawer('password')}
                   className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
                 >
                   <Key size={18} />
@@ -412,57 +419,95 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
         </div>
       )}
 
-      {/* Profile Modal */}
-      {showProfileModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center sm:items-center items-start z-[60] p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200 my-auto sm:my-0">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-bold text-gray-900">Profile Details</h2>
-              <button onClick={() => setShowProfileModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+      {/* Side Drawer */}
+      <div 
+        className={`fixed inset-0 z-[100] transition-all duration-500 ${drawerOpen ? 'visible' : 'invisible'}`}
+      >
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-500 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setDrawerOpen(false)}
+        />
+        
+        {/* Drawer Content */}
+        <div 
+          className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-500 ease-in-out transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+              <h2 className="text-xl font-bold text-gray-900">
+                {drawerView === 'profile' ? 'Profile Details' : 'Change Password'}
+              </h2>
+              <button 
+                onClick={() => setDrawerOpen(false)} 
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+              >
+                <X size={24} />
+              </button>
             </div>
-            <div className="p-6">
-              {!profileData ? (
-                <div className="text-center py-8 text-gray-500">Loading details...</div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30">
+              {drawerView === 'profile' ? (
+                !profileData ? (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                    <p className="text-gray-500 font-medium">Fetching your details...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="flex items-center gap-4 p-5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl shadow-lg shadow-blue-100 text-white">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-3xl font-bold border border-white/30">
+                        {profileData.name?.[0]}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xl">{profileData.name}</h3>
+                        <p className="text-blue-100 text-sm font-medium opacity-90">{profileData.registration_number}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <DrawerItem label="Email Address" value={profileData.email_address} icon={<UserCircle size={20} />} />
+                      <DrawerItem label="Mobile Number" value={profileData.mobile_number} icon={<User size={20} />} />
+                      <DrawerItem label="Father's/Guardian Name" value={profileData.father_guardian_name} icon={<User size={20} />} />
+                      <DrawerItem label="Gender" value={profileData.gender} icon={<User size={20} />} />
+                      <DrawerItem label="Current Class" value={profileData.current_class} icon={<User size={20} />} />
+                      <DrawerItem label="Course/Program" value={profileData.course_program} icon={<User size={20} />} />
+                    </div>
+
+                    <div className="pt-6 border-t border-gray-100">
+                       <div className="bg-green-50 text-green-700 px-4 py-4 rounded-2xl flex items-center gap-3 border border-green-100 shadow-sm">
+                         <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                         <span className="text-xs font-bold uppercase tracking-widest">Official Student Account</span>
+                       </div>
+                    </div>
+                  </div>
+                )
               ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailItem label="Full Name" value={profileData.name} />
-                    <DetailItem label="Reg Number" value={profileData.registration_number} />
-                    <DetailItem label="Email" value={profileData.email_address} />
-                    <DetailItem label="Mobile" value={profileData.mobile_number} />
-                    <DetailItem label="Father's Name" value={profileData.father_guardian_name} />
-                    <DetailItem label="Gender" value={profileData.gender} />
-                    <DetailItem label="Class" value={profileData.current_class} />
-                    <DetailItem label="Course" value={profileData.course_program} />
-                  </div>
-                  <div className="mt-6 pt-6 border-t border-gray-100">
-                    <p className="text-xs text-gray-400">Account status: <span className="text-green-600 font-medium">Approved Student</span></p>
-                  </div>
-                </div>
+                <PasswordForm onSuccess={() => setDrawerOpen(false)} />
               )}
             </div>
           </div>
         </div>
-      )}
-
-      {/* Change Password Modal */}
-      {showPasswordModal && (
-        <PasswordModal onClose={() => setShowPasswordModal(false)} />
-      )}
+      </div>
     </nav>
   );
 }
 
-function DetailItem({ label, value }: { label: string; value?: string }) {
+function DrawerItem({ label, value, icon }: { label: string; value?: string; icon: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-sm font-medium text-gray-900 mt-0.5">{value || '—'}</p>
+    <div className="group">
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1 group-hover:text-blue-600 transition-colors">{label}</p>
+      <div className="flex items-center gap-3 text-gray-900 font-semibold bg-white px-5 py-4 rounded-2xl border border-gray-100 group-hover:border-blue-200 transition-all shadow-sm group-hover:shadow-md">
+        <span className="text-gray-400 group-hover:text-blue-500 transition-colors">{icon}</span>
+        <span className="truncate">{value || 'Not provided'}</span>
+      </div>
     </div>
   );
 }
 
-function PasswordModal({ onClose }: { onClose: () => void }) {
+function PasswordForm({ onSuccess }: { onSuccess: () => void }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -488,7 +533,7 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.success) {
         setSuccess(true);
-        setTimeout(onClose, 2000);
+        setTimeout(onSuccess, 1500);
       } else {
         setError(data.message || 'Failed to change password');
       }
@@ -499,62 +544,97 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center sm:items-center items-start z-[60] p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200 my-auto sm:my-0">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+  if (success) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-in zoom-in-95 duration-500">
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center shadow-lg shadow-green-100">
+          <svg className="w-12 h-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {success ? (
-            <div className="bg-green-50 text-green-700 p-4 rounded-xl text-center font-medium border border-green-100">
-              Password updated successfully!
-            </div>
-          ) : (
-            <>
-              {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100">{error}</div>}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Current Password</label>
-                <input
-                  type="password"
-                  required
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
-              >
-                {loading ? 'Updating...' : 'Update Password'}
-              </button>
-            </>
-          )}
-        </form>
+        <div className="text-center space-y-2">
+          <h3 className="text-2xl font-bold text-gray-900">Updated!</h3>
+          <p className="text-gray-500">Your password is now secure.</p>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-3 shadow-sm">
+          <X size={18} />
+          {error}
+        </div>
+      )}
+      
+      <div className="space-y-6">
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Current Password</label>
+          <div className="relative group">
+            <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <input
+              type="password"
+              required
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-50/50 focus:border-blue-500 outline-none transition-all font-semibold shadow-sm"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        <div className="h-px bg-gray-100" />
+
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">New Password</label>
+          <div className="relative group">
+            <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <input
+              type="password"
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-50/50 focus:border-blue-500 outline-none transition-all font-semibold shadow-sm"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Confirm New Password</label>
+          <div className="relative group">
+            <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-50/50 focus:border-blue-500 outline-none transition-all font-semibold shadow-sm"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+      >
+        {loading ? (
+          <>
+            <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            Updating...
+          </>
+        ) : (
+          <>
+            Update Password
+            <ChevronRight size={20} />
+          </>
+        )}
+      </button>
+    </form>
   );
 }
