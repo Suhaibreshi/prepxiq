@@ -1,0 +1,13 @@
+-- Run these queries in your Supabase SQL Editor to support the new features
+
+-- 1. Add updated_at to users table for password change tracking
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+-- 2. Add updated_at to registrations table for consistency
+ALTER TABLE registrations 
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+-- 3. (Reference) The Change Password API and Profile fetch use the Service Role key,
+-- so they have full access. If you later switch to client-side Supabase calls, 
+-- you will need to configure Row Level Security (RLS) policies.
