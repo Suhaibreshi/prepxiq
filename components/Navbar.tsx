@@ -139,285 +139,287 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20 sm:h-24">
-          <div className="flex items-center">
-            <Logo />
-          </div>
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            {/* Courses Dropdown */}
-            <div
-              ref={dropdownRef}
-              className="relative"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                className="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition-colors"
-                onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-              >
-                Courses
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform duration-200 ${isCoursesOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-
-              {/* First-level dropdown */}
-              {isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-                  {courseCategories.map((category, index) => (
-                    <div
-                      key={category.name}
-                      className="relative"
-                      onMouseEnter={() => handleCategoryEnter(index)}
-                    >
-                      <button
-                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors ${activeCategory === index
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
-                          }`}
-                      >
-                        {category.name}
-                        <ChevronRight size={14} className="text-gray-400" />
-                      </button>
-
-                      {/* Second-level fly-out */}
-                      {activeCategory === index && (
-                        <div className="absolute left-full top-0 ml-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
-                          {category.subOptions.map((option) => (
-                            <a
-                              key={option.label}
-                              href={option.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors"
-                            >
-                              {option.label}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+    <>
+      <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20 sm:h-24">
+            <div className="flex items-center">
+              <Logo />
             </div>
 
-            <a href="#features" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Features
-            </a>
-            <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              About
-            </a>
-            <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Contact
-            </a>
-            {isAuthenticated ? (
-              <div className="relative" ref={profileDropdownRef}>
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center space-x-8">
+              {/* Courses Dropdown */}
+              <div
+                ref={dropdownRef}
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
                 <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                  onClick={() => setIsCoursesOpen(!isCoursesOpen)}
                 >
-                  <UserCircle size={24} />
-                  <span className="font-medium text-sm hidden lg:inline-block">{user?.name || 'My Profile'}</span>
-                  <ChevronDown size={16} className={`transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  Courses
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${isCoursesOpen ? 'rotate-180' : ''}`}
+                  />
                 </button>
 
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                      <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                    </div>
-                    
-                    <button
-                      onClick={() => openDrawer('profile')}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    >
-                      <User size={18} />
-                      My Profile
-                    </button>
-                    
-                    <button
-                      onClick={() => openDrawer('password')}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    >
-                      <Key size={18} />
-                      Change Password
-                    </button>
+                {/* First-level dropdown */}
+                {isCoursesOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                    {courseCategories.map((category, index) => (
+                      <div
+                        key={category.name}
+                        className="relative"
+                        onMouseEnter={() => handleCategoryEnter(index)}
+                      >
+                        <button
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors ${activeCategory === index
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                            }`}
+                        >
+                          {category.name}
+                          <ChevronRight size={14} className="text-gray-400" />
+                        </button>
 
-                    <div className="h-px bg-gray-100 my-1 mx-2" />
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut size={18} />
-                      Logout
-                    </button>
+                        {/* Second-level fly-out */}
+                        {activeCategory === index && (
+                          <div className="absolute left-full top-0 ml-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                            {category.subOptions.map((option) => (
+                              <a
+                                key={option.label}
+                                href={option.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors"
+                              >
+                                {option.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            ) : (
-              <Link
-                href="/login"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
-              >
-                Login
-              </Link>
-            )}
-          </div>
 
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
+              <a href="#features" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Features
+              </a>
+              <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                About
+              </a>
+              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Contact
+              </a>
+              {isAuthenticated ? (
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                  >
+                    <UserCircle size={24} />
+                    <span className="font-medium text-sm hidden lg:inline-block">{user?.name || 'My Profile'}</span>
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
-          <div className="px-4 py-4 space-y-1">
-            {/* Mobile Courses Accordion */}
-            <div>
-              <button
-                onClick={() => {
-                  setMobileCoursesOpen(!mobileCoursesOpen);
-                  if (mobileCoursesOpen) setMobileActiveCategory(null);
-                }}
-                className="w-full flex items-center justify-between px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
-              >
-                Courses
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform duration-200 ${mobileCoursesOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-
-              {mobileCoursesOpen && (
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-100 pl-2">
-                  {courseCategories.map((category, index) => (
-                    <div key={category.name}>
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                      <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                        <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      </div>
+                      
                       <button
-                        onClick={() =>
-                          setMobileActiveCategory(mobileActiveCategory === index ? null : index)
-                        }
-                        className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium rounded-lg transition-colors ${mobileActiveCategory === index
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                          }`}
+                        onClick={() => openDrawer('profile')}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
-                        {category.name}
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${mobileActiveCategory === index ? 'rotate-180' : ''
-                            }`}
-                        />
+                        <User size={18} />
+                        My Profile
+                      </button>
+                      
+                      <button
+                        onClick={() => openDrawer('password')}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        <Key size={18} />
+                        Change Password
                       </button>
 
-                      {mobileActiveCategory === index && (
-                        <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-blue-50 pl-2">
-                          {category.subOptions.map((option) => (
-                            <a
-                              key={option.label}
-                              href={option.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {option.label}
-                            </a>
-                          ))}
-                        </div>
-                      )}
+                      <div className="h-px bg-gray-100 my-1 mx-2" />
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={18} />
+                        Logout
+                      </button>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-
-            <a
-              href="#features"
-              className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Features
-            </a>
-            <a
-              href="#about"
-              className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </a>
-            <a
-              href="#contact"
-              className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </a>
-            {isAuthenticated ? (
-              <>
-                <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-blue-50/50 rounded-lg">
-                  <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                </div>
-                <button
-                  onClick={() => openDrawer('profile')}
-                  className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
-                >
-                  <User size={18} />
-                  My Profile
-                </button>
-                <button
-                  onClick={() => openDrawer('password')}
-                  className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
-                >
-                  <Key size={18} />
-                  Change Password
-                </button>
-                <button
-                  onClick={() => { handleLogout(); setIsMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors flex items-center gap-3"
-                >
-                  <LogOut size={18} />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
+              ) : (
                 <Link
                   href="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   Login
                 </Link>
-                {!hideRegisterButton && (
-                  <button
-                    onClick={() => {
-                      onRegisterClick?.();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
-                  >
-                    Register Now
-                  </button>
-                )}
-              </>
-            )}
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            <div className="px-4 py-4 space-y-1">
+              {/* Mobile Courses Accordion */}
+              <div>
+                <button
+                  onClick={() => {
+                    setMobileCoursesOpen(!mobileCoursesOpen);
+                    if (mobileCoursesOpen) setMobileActiveCategory(null);
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                >
+                  Courses
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${mobileCoursesOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {mobileCoursesOpen && (
+                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-100 pl-2">
+                    {courseCategories.map((category, index) => (
+                      <div key={category.name}>
+                        <button
+                          onClick={() =>
+                            setMobileActiveCategory(mobileActiveCategory === index ? null : index)
+                          }
+                          className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium rounded-lg transition-colors ${mobileActiveCategory === index
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                            }`}
+                        >
+                          {category.name}
+                          <ChevronDown
+                            size={14}
+                            className={`transition-transform duration-200 ${mobileActiveCategory === index ? 'rotate-180' : ''
+                              }`}
+                          />
+                        </button>
+
+                        {mobileActiveCategory === index && (
+                          <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-blue-50 pl-2">
+                            {category.subOptions.map((option) => (
+                              <a
+                                key={option.label}
+                                href={option.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                {option.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <a
+                href="#features"
+                className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a
+                href="#about"
+                className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </a>
+              <a
+                href="#contact"
+                className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </a>
+              {isAuthenticated ? (
+                <>
+                  <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-blue-50/50 rounded-lg">
+                    <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={() => openDrawer('profile')}
+                    className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
+                  >
+                    <User size={18} />
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => openDrawer('password')}
+                    className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
+                  >
+                    <Key size={18} />
+                    Change Password
+                  </button>
+                  <button
+                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors flex items-center gap-3"
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+                  >
+                    Login
+                  </Link>
+                  {!hideRegisterButton && (
+                    <button
+                      onClick={() => {
+                        onRegisterClick?.();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+                    >
+                      Register Now
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Side Drawer */}
       <div 
@@ -491,7 +493,7 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
           </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
 
