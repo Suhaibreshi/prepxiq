@@ -112,6 +112,28 @@ function RegistrationsContent() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this registration? This will also delete the associated user account if it exists.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/registrations/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchRegistrations();
+        setSelectedReg(null);
+      } else {
+        alert(data.message || 'Failed to delete registration');
+      }
+    } catch (err) {
+      console.error('Failed to delete registration:', err);
+      alert('An error occurred while deleting');
+    }
+  };
+
   const courses = ['6th Class', '7th Class', '8th Class', '9th Class', '10th Class', '11th - PCM', '11th - PCB', '12th - PCM', '12th - PCB', 'JEE', 'NEET', 'JKSSB'];
 
   return (
@@ -214,12 +236,20 @@ function RegistrationsContent() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button
-                        onClick={() => setSelectedReg(reg)}
-                        className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-                      >
-                        View
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSelectedReg(reg)}
+                          className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(reg.id)}
+                          className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -323,7 +353,7 @@ function RegistrationsContent() {
                 </div>
               </div>
 
-              {selectedReg.status === 'pending' && (
+              {selectedReg.status === 'pending' ? (
                 <div className="flex gap-3 pt-4 border-t border-gray-200">
                   <button
                     onClick={() => handleStatusChange(selectedReg.id, 'approved')}
@@ -338,10 +368,19 @@ function RegistrationsContent() {
                     Reject
                   </button>
                   <button
-                    onClick={() => handleStatusChange(selectedReg.id, 'waitlisted')}
-                    className="flex-1 py-3 rounded-xl font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors"
+                    onClick={() => handleDelete(selectedReg.id)}
+                    className="flex-1 py-3 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
                   >
-                    Waitlist
+                    Delete
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                   <button
+                    onClick={() => handleDelete(selectedReg.id)}
+                    className="flex-1 py-3 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  >
+                    Delete Registration
                   </button>
                 </div>
               )}

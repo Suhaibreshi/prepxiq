@@ -1,13 +1,14 @@
 'use client';
 
-import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronDown, ChevronRight, User, LogOut, Key, UserCircle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from './Logo';
-import { useAuth } from '@/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 
 interface NavbarProps {
   onRegisterClick?: () => void;
+  hideRegisterButton?: boolean;
 }
 
 const courseCategories = [
@@ -54,29 +55,61 @@ const courseCategories = [
   },
 ];
 
-export default function Navbar({ onRegisterClick }: NavbarProps) {
-  const { isAuthenticated, logout: authLogout, phone } = useAuth();
+export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarProps) {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === 'authenticated';
+  const user = session?.user;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
+  // Modals
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+
   // Mobile accordion states
   const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
   const [mobileActiveCategory, setMobileActiveCategory] = useState<number | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Close desktop dropdown when clicking outside
+  // Close desktop dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsCoursesOpen(false);
         setActiveCategory(null);
       }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const fetchProfileDetails = async () => {
+    try {
+      const res = await fetch('/api/student/profile');
+      const data = await res.json();
+      if (data.success) {
+        setProfileData(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (showProfileModal && !profileData) {
+      fetchProfileDetails();
+    }
+  }, [showProfileModal]);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -94,12 +127,8 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
     setActiveCategory(index);
   };
 
-  const logout = () => {
-    authLogout();
-  };
-
-  const maskPhone = (phone: string) => {
-    return phone.replace(/(\+91)(\d{5})(\d{5})/, '$1 $2 ****');
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -181,14 +210,50 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
               Contact
             </a>
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <span className="text-gray-600 text-sm">{phone ? maskPhone(phone) : ''}</span>
+              <div className="relative" ref={profileDropdownRef}>
                 <button
-                  onClick={logout}
-                  className="text-gray-500 hover:text-red-600 text-sm font-medium transition-colors"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                 >
-                  Logout
+                  <UserCircle size={24} />
+                  <span className="font-medium text-sm hidden lg:inline-block">{user?.name || 'My Profile'}</span>
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                      <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    </div>
+                    
+                    <button
+                      onClick={() => { setShowProfileModal(true); setIsProfileOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      <User size={18} />
+                      My Profile
+                    </button>
+                    
+                    <button
+                      onClick={() => { setShowPasswordModal(true); setIsProfileOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      <Key size={18} />
+                      Change Password
+                    </button>
+
+                    <div className="h-px bg-gray-100 my-1 mx-2" />
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={18} />
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
@@ -295,13 +360,29 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
             </a>
             {isAuthenticated ? (
               <>
-                <div className="px-4 py-2 text-gray-500 text-sm">
-                  {phone ? maskPhone(phone) : ''}
+                <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-blue-50/50 rounded-lg">
+                  <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                 </div>
                 <button
-                  onClick={() => { logout(); setIsMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                  onClick={() => { setShowProfileModal(true); setIsMenuOpen(false); }}
+                  className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
                 >
+                  <User size={18} />
+                  My Profile
+                </button>
+                <button
+                  onClick={() => { setShowPasswordModal(true); setIsMenuOpen(false); }}
+                  className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors flex items-center gap-3"
+                >
+                  <Key size={18} />
+                  Change Password
+                </button>
+                <button
+                  onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                  className="w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors flex items-center gap-3"
+                >
+                  <LogOut size={18} />
                   Logout
                 </button>
               </>
@@ -314,20 +395,166 @@ export default function Navbar({ onRegisterClick }: NavbarProps) {
                 >
                   Login
                 </Link>
-                <button
-                  onClick={() => {
-                    onRegisterClick?.();
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
-                >
-                  Register Now
-                </button>
+                {!hideRegisterButton && (
+                  <button
+                    onClick={() => {
+                      onRegisterClick?.();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+                  >
+                    Register Now
+                  </button>
+                )}
               </>
             )}
           </div>
         </div>
       )}
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-xl font-bold text-gray-900">Profile Details</h2>
+              <button onClick={() => setShowProfileModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            <div className="p-6">
+              {!profileData ? (
+                <div className="text-center py-8 text-gray-500">Loading details...</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <DetailItem label="Full Name" value={profileData.name} />
+                    <DetailItem label="Reg Number" value={profileData.registration_number} />
+                    <DetailItem label="Email" value={profileData.email_address} />
+                    <DetailItem label="Mobile" value={profileData.mobile_number} />
+                    <DetailItem label="Father's Name" value={profileData.father_guardian_name} />
+                    <DetailItem label="Gender" value={profileData.gender} />
+                    <DetailItem label="Class" value={profileData.current_class} />
+                    <DetailItem label="Course" value={profileData.course_program} />
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-xs text-gray-400">Account status: <span className="text-green-600 font-medium">Approved Student</span></p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <PasswordModal onClose={() => setShowPasswordModal(false)} />
+      )}
     </nav>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+      <p className="text-sm font-medium text-gray-900 mt-0.5">{value || '—'}</p>
+    </div>
+  );
+}
+
+function PasswordModal({ onClose }: { onClose: () => void }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/student/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess(true);
+        setTimeout(onClose, 2000);
+      } else {
+        setError(data.message || 'Failed to change password');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {success ? (
+            <div className="bg-green-50 text-green-700 p-4 rounded-xl text-center font-medium border border-green-100">
+              Password updated successfully!
+            </div>
+          ) : (
+            <>
+              {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100">{error}</div>}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Current Password</label>
+                <input
+                  type="password"
+                  required
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">New Password</label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
+              >
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </>
+          )}
+        </form>
+      </div>
+    </div>
   );
 }
