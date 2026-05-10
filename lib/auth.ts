@@ -123,7 +123,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const u = user as any;
         token.role = u.role;
         if (u.role === 'admin') {
@@ -136,13 +135,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).id = token.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).role = token.role;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (token.role === 'admin') (session.user as any).username = token.username;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (token.role === 'student') (session.user as any).name = token.name;
       }
       return session;

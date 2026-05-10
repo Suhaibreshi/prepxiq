@@ -8,7 +8,6 @@ export const PUT = auth(async function PUT(req, { params }) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = (params as any).id;
   const { status } = await req.json();
 

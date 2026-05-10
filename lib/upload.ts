@@ -27,7 +27,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (file.fieldname === 'photo') {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];

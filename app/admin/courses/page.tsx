@@ -38,7 +38,6 @@ export default function CoursesPage() {
       const res = await fetch('/api/admin/courses');
       const data = await res.json();
       if (data.success) setCourses(data.data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -56,7 +55,6 @@ export default function CoursesPage() {
     try {
       await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
       loadCourses();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     }
@@ -197,7 +195,6 @@ function CourseFormModal({ course, onSave, onCancel }: CourseFormModalProps) {
       const data = await res.json();
       if (data.success) onSave();
       else setError(data.message || 'Failed to save');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {

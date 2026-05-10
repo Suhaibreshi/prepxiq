@@ -22,7 +22,6 @@ export const GET = auth(async function GET(req) {
   }
 
   const counts = { total: data.length, pending: 0, approved: 0, rejected: 0, waitlisted: 0 };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data.forEach((r: any) => {
     if (counts[r.status as keyof typeof counts] !== undefined) {
       counts[r.status as keyof typeof counts]++;

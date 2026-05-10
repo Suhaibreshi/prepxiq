@@ -109,7 +109,7 @@ export default function Navbar({ onRegisterClick, hideRegisterButton }: NavbarPr
     if (showProfileModal && !profileData) {
       fetchProfileDetails();
     }
-  }, [showProfileModal]);
+  }, [showProfileModal, profileData]);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -492,7 +492,7 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
       } else {
         setError(data.message || 'Failed to change password');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
